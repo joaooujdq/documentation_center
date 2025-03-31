@@ -1,0 +1,88 @@
+#CriarBranchBody{
+    width: 60vw;
+    height: 65vh;
+    padding: 5vh 0 5vh 0;
+    margin: 0 20vw 0 20vw ;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#CriarBranchBody #TitleBar{
+   border-radius: 8px 8px 0px 0px;
+   width: 35vw;
+    height: 2vw;
+    background-color:  #C4C4C4;
+    font-size: 20px;
+    padding:10px 0px 0px 20px;
+    margin: 0 0 0 20px;
+}
+#CriarBranchBody #BranchUl{
+    width: 35vw;
+    height: 52vh;
+    margin: 0 0 0 20px;
+    padding: 0;
+    border-radius: 0px 0px 8px 8px;
+    border: 3px solid #C4C4C4;
+    box-shadow: 3px rgba(0, 0, 0, 0.527);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#CriarBranchBody #BranchUl #BranchForm{
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    width: 25vw;
+    height: 43vh;
+    border-radius: 0px 0px 4px 4px;
+ }
+ #CriarBranchBody #BranchUl #BranchForm #divH1 {
+    display: flex;
+    flex-direction: column;
+    height: 45vh;
+    justify-content: center;
+    align-items: center;
+    width: 14vw;
+    margin: 1.3vh 0vw;
+    
+}
+#CriarBranchBody #BranchUl #BranchForm #divInput{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 45vh;
+    width: 14vw;
+    border-radius: 8px;
+    border-style: none;
+}
+#CriarBranchBody #BranchUl #BranchForm #divInput #input{
+    padding: 0 0 15px 0;
+    font-size: 2vh;
+    margin-bottom: 3vh;
+    margin-right: 3vh;
+    padding-left: 5px;
+    padding-top: 15px;
+    width: 10vw;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.16);
+    box-shadow: 2px rgba(0, 0, 0, 0.11);
+    height: 15px;
+    text-align: justify;
+    text-justify: inherit;
+    text-orientation: sideways;
+}
+#CriarBranchBody #BranchUl #BranchForm #divH1 h1{
+    padding: 0px 0px 60px 0px;
+    height: 30px;
+    width: 12.5vw;
+    font-size: 22px;
+}
+#CriarBranchBody  #BranchUl button{
+    margin: 0 0 60px 0;
+    border-radius: 8px;
+    width: 8vw;
+    height: 4vh;
+}
