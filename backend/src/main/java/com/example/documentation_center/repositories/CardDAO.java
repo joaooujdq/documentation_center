@@ -10,8 +10,8 @@ import java.util.Optional;
 public interface CardDAO extends JpaRepository<Card, Integer> {
 
     Page<Card> findByNomeContains(String searchTerm, Pageable pageable);
-    //Page<Card> findByRazaoContains(String searchTerm, Pageable pageable);
-    //Page<Card> findByEnderecoContains(String searchTerm, Pageable pageable);
+    Page<Card> findByNomeContainsAndCategoria(String nome, String categoria, Pageable pageable);
+    Page<Card> findByCategoriaContains(String categoria, Pageable pageable);
 
     Optional<Card> findByNome(String nome);
     //Optional<Card> findByEmail(String email);

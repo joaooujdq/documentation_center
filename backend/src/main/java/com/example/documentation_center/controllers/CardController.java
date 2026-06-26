@@ -44,6 +44,23 @@ public class CardController {
                 );
         return ResponseEntity.ok(CollectionModel.of(pages));
     }
+    @GetMapping("/pesquisa")
+    @Operation(summary = "Pesquisa cards por nome e/ou categoria")
+    public ResponseEntity<CollectionModel<CardDTO>> pesquisar(
+            @RequestParam(value="page", defaultValue = "0") int page,
+            @RequestParam(value="limit", defaultValue = "12") int limit,
+            @RequestParam(value="direction", defaultValue = "desc") String direction,
+            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
+            @RequestParam(value="nome", required = false) String nome,
+            @RequestParam(value="categoria", required = false) String categoria) {
+        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
+        Page<CardDTO> pages = service.pesquisar(nome, categoria, pageable);
+        pages.stream().forEach(p -> p.add(
+                linkTo(methodOn(CardController.class).buscarUm(p.getCodigo())).withSelfRel()));
+        return ResponseEntity.ok(CollectionModel.of(pages));
+    }
+
     @GetMapping("/nomes")
     @Operation(summary = "Busca pelo nome")
     public ResponseEntity<CollectionModel<CardDTO>> buscarPeloNome(

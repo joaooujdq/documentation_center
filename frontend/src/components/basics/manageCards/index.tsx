@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../../../services/api";
 import React from 'react'
 import Alert from 'react-popup-alert'
 import '../manageCards/index.css'
-import { FiArrowDown, FiArrowUp, FiEdit, FiTrash } from "react-icons/fi";
-import { Link, useHistory } from "react-router-dom";
+import { FiArrowDown, FiArrowUp, FiEdit, FiTrash, FiSearch } from "react-icons/fi";
+import { useHistory } from "react-router-dom";
 import Popup from "reactjs-popup";
 
 interface iuser {
@@ -39,6 +39,9 @@ interface icard {
     imageLink_card: string,
     thumbnail_card: string,
     data_card: string,
+    resumo_card: string,
+    tags_card: string,
+    categoria_card: string,
     folderDTO: ifolder,
     _links_card: i_links
 }
@@ -49,12 +52,16 @@ interface iself {
     href: string
 }
 
+const CATEGORIAS = ['', 'API', 'Banco de Dados', 'DevOps', 'Frontend', 'Infraestrutura', 'Segurança'];
+
 const CardBody: React.FC = () => {
     const [Msg, setMsg] = useState<icard[]>([]);
-    const [Limit, setLimit] = useState<icard[]>([]);
-    const [direction, setDirection] = useState('desc');
-    const [ordenation, setOrdenation] = useState('codigo');
+    const [totalCards, setTotalCards] = useState(0);
+    const [direction] = useState('desc');
+    const [ordenation] = useState('codigo');
     const [page, setPage] = useState(0);
+    const [busca, setBusca] = useState('');
+    const [categoria, setCategoria] = useState('');
     const [codigo, setCodigo] = useState('');
     const [nome, setNome] = useState('');
     const [imageLink, setImageLink] = useState('');
@@ -65,168 +72,153 @@ const CardBody: React.FC = () => {
     const [branchId, setBranchId] = useState('');
     const [branchNome, setBranchNome] = useState('');
     const [userId, setUserId] = useState('');
-    const [userNome, setUserNome] = useState("");
-    const [descricao, setDescricao] = useState("");
-    const [descricao2, setDescricao2] = useState("");
+    const [userNome, setUserNome] = useState('');
+    const [descricao2, setDescricao2] = useState('');
+    const [resumo, setResumo] = useState('');
+    const [tags, setTags] = useState('');
+    const [categoriaCard, setCategoriaCard] = useState('');
     const [isOpen, setIsOpen] = useState(false);
-    const [post, setPost] = useState(false);
+    const alertMsg = useRef('');
+    const [alertState, setAlertState] = useState({ show: false, text: '' });
+    const isAdmin = localStorage.getItem('admin') === 'true';
     const history = useHistory();
+
+    const PAGE_SIZE = 4;
 
     useEffect(() => {
         const loadMsg = async () => {
-            const response = await api.get('/v1/ts/cards', { params: { page: page, limit: 4, direction: direction, ordenation: ordenation } });
-            const limit = await api.get('/v1/ts/cards');
-            if (Object.keys(response.data).length) {
-                setMsg(response.data._embedded.cardDTOList);
-            } else {
+            const params: any = { page, limit: PAGE_SIZE, direction, ordenation };
+            if (busca) params.nome = busca;
+            if (categoria) params.categoria = categoria;
+            const endpoint = (busca || categoria) ? '/v1/ts/cards/pesquisa' : '/v1/ts/cards';
+            try {
+                const response = await api.get(endpoint, { params });
+                const embedded = response.data?._embedded?.cardDTOList;
+                setMsg(embedded ?? []);
+                setTotalCards(response.data?.page?.totalElements ?? (embedded?.length ?? 0));
+            } catch {
                 setMsg([]);
+                setTotalCards(0);
             }
-            setLimit(limit.data._embedded.cardDTOList);
-        }
-        loadMsg()
-    }, [page]);
+        };
+        loadMsg();
+    }, [page, busca, categoria]);
 
-    const deleteMsg = async (codigo: string) => {
-        if(localStorage.getItem("admin") != 'true'){
-            setDescricao("Você não tem permissão")
-            setPost(!post)
-        }else{
-        const responseDelete = await api.delete('/v1/ts/cards/' + codigo);
-        window.location.reload()
-        }
-    }
+    // reseta página ao mudar filtro
+    useEffect(() => { setPage(0); }, [busca, categoria]);
 
-    const updateMsg = async () => {
-        if(localStorage.getItem("admin") != 'true'){
-            setDescricao("Você não tem permissão")
-            setPost(!post)
-        }else{
-        history.push('/updateCard')
-        }
-    }
+    const showAlert = (msg: string) => {
+        alertMsg.current = msg;
+        setAlertState({ show: true, text: msg });
+    };
 
-    const criarNovo = async () => {
-        if(localStorage.getItem("admin") != 'true'){
-            setDescricao("Você não tem permissão")
-            setPost(!post)
-        }else{
-        history.push('/newcard')
-        }
-    }
+    const deleteMsg = async (id: string) => {
+        if (!isAdmin) { showAlert('Você não tem permissão'); return; }
+        await api.delete('/v1/ts/cards/' + id);
+        window.location.reload();
+    };
 
-    const ExibirMsg = async (codigo: string) => {
-        const response = await api.get('/v1/ts/cards/' + codigo);
-        setCodigo(response.data.codigo_card)
-        setNome(response.data.nome_card)
-        setDescricao2(response.data.descricao_card)
-        setImageLink(response.data.imageLink_card)
-        setThumbnailLink(response.data.thumbnail_card)
-        setData(response.data.data_card)
-        setFolderId(response.data.folderDTO.codigo_folder)
-        setFolderNome(response.data.folderDTO.nome_folder)
-        setBranchId(response.data.folderDTO.branchDTO.codigo_branch)
-        setBranchNome(response.data.folderDTO.branchDTO.nome_branch)
-        setUserId(response.data.folderDTO.branchDTO.userDTO.codigo_user)
-        setUserNome(response.data.folderDTO.branchDTO.userDTO.nome_user)
-    }
+    const updateMsg = () => {
+        if (!isAdmin) { showAlert('Você não tem permissão'); return; }
+        history.push('/updateCard');
+    };
 
-    useEffect(() => {
-        if (post) {
-            onShowAlert('error')
-        }
-    }, [post])
+    const criarNovo = () => {
+        if (!isAdmin) { showAlert('Você não tem permissão'); return; }
+        history.push('/newcard');
+    };
 
-    const [alert, setAlert] = React.useState({
-        type: 'error',
-        text: descricao,
-        show: false
-    })
+    const ExibirMsg = async (id: string) => {
+        const response = await api.get('/v1/ts/cards/' + id);
+        const d = response.data;
+        setCodigo(d.codigo_card);
+        setNome(d.nome_card);
+        setDescricao2(d.descricao_card);
+        setImageLink(d.imageLink_card);
+        setThumbnailLink(d.thumbnail_card);
+        setData(d.data_card);
+        setResumo(d.resumo_card ?? '');
+        setTags(d.tags_card ?? '');
+        setCategoriaCard(d.categoria_card ?? '');
+        setFolderId(d.folderDTO.codigo_folder);
+        setFolderNome(d.folderDTO.nome_folder);
+        setBranchId(d.folderDTO.branchDTO.codigo_branch);
+        setBranchNome(d.folderDTO.branchDTO.nome_branch);
+        setUserId(d.folderDTO.branchDTO.userDTO.codigo_user);
+        setUserNome(d.folderDTO.branchDTO.userDTO.nome_user);
+    };
 
-    function onCloseAlert() {
-        setAlert({
-            type: '',
-            text: '',
-            show: false
-        })
-        setPost(!post)
-    }
-
-    async function onShowAlert(type: string) {
-        await setAlert({
-            type: type,
-            text: descricao,
-            show: true
-        })
-    }
     return (
         <>
             <Alert
                 header={''}
                 btnText={'Fechar'}
-                text={alert.text}
-                type={alert.type}
-                show={alert.show}
-                onClosePress={onCloseAlert}
+                text={alertState.text}
+                type={'error'}
+                show={alertState.show}
+                onClosePress={() => setAlertState({ show: false, text: '' })}
                 pressCloseOnOutsideClick={true}
                 showBorderBottom={true}
                 alertStyles={{
-                    "background-color": "#f8f9fa",
-                    "width": "300px",
-                    "height": "100px",
-                    "display": "flex",
-                    "flex-direction": "column",
-                    "align-items": "center",
-                    "justify-content": "center",
-                    "left": "42%",
-                    "bottom": "30%",
-                    "border-radius": "8px",
-                    "border": "2px solid #C4C4C4",
-                    "position": "absolute"
+                    "background-color": "#f8f9fa", "width": "300px", "height": "100px",
+                    "display": "flex", "flex-direction": "column", "align-items": "center",
+                    "justify-content": "center", "left": "42%", "bottom": "30%",
+                    "border-radius": "8px", "border": "2px solid #C4C4C4", "position": "absolute"
                 }}
-                headerStyles={{}}
-                textStyles={{}}
+                headerStyles={{}} textStyles={{}}
                 buttonStyles={{
-                    "background-color": "#efefef",
-                    "border-radius": "8px",
-                    "margin-bottom": "10px",
-                    "text-decoration": "none",
-                    "button-decoration": "none",
-                    "align-text": "center",
-                    "width": "70px",
-                    "border": "2px solid #C4C4C4",
-                    "height": "30px",
-                    "color": "#000",
-                    "padding-left": "10px"
+                    "background-color": "#efefef", "border-radius": "8px", "margin-bottom": "10px",
+                    "width": "70px", "border": "2px solid #C4C4C4", "height": "30px",
+                    "color": "#000", "padding-left": "10px"
                 }}
             />
             <body id='CardBody'>
-                <div id='sidebar' >
-               
-                        <button id='newObj' onClick={criarNovo}>Criar novo</button>
-          
-                    < FiArrowUp id='carouselIcon' onClick={() => { if (page - 1 >= 0) setPage(page - 1) }}/>
-                    {
-                        Msg.map(m => (
-                            <button id='buttons' >
-                                <button id='text' onClick={() => { ExibirMsg(m.codigo_card.toString()) }}>
-                                    <h6>{m.nome_card}</h6>
-                                    <h4>{m.descricao_card}</h4>
-                                </button>
-                                <div id='iconsButtons'>
-                                   
-                                        <FiEdit id='editButton' onClick={updateMsg}></FiEdit>
-                           
-                                    <Popup trigger={<FiTrash id='deleteButton'></FiTrash>} position="center center" open={isOpen}>
+                <div id='sidebar'>
+                    {isAdmin && <button id='newObj' onClick={criarNovo}>Criar novo</button>}
+
+                    <div id='searchBar'>
+                        <FiSearch id='searchIcon' />
+                        <input
+                            id='searchInput'
+                            placeholder='Buscar por nome...'
+                            value={busca}
+                            onChange={e => setBusca(e.target.value)}
+                        />
+                        <select
+                            id='categoriaSelect'
+                            value={categoria}
+                            onChange={e => setCategoria(e.target.value)}
+                        >
+                            {CATEGORIAS.map(c => (
+                                <option key={c} value={c}>{c || 'Todas as categorias'}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <FiArrowUp id='carouselIcon' onClick={() => { if (page > 0) setPage(page - 1); }} />
+                    {Msg.map(m => (
+                        <button id='buttons' key={m.codigo_card}>
+                            <button id='text' onClick={() => ExibirMsg(m.codigo_card.toString())}>
+                                <h6>{m.nome_card}</h6>
+                                <h4>{m.descricao_card}</h4>
+                            </button>
+                            <div id='iconsButtons'>
+                                {isAdmin && <FiEdit id='editButton' onClick={updateMsg} />}
+                                {isAdmin && (
+                                    <Popup trigger={<FiTrash id='deleteButton' />} position="center center" open={isOpen}>
                                         <h4 id='popupText'>Tem certeza que deseja excluir?</h4>
-                                        <button id='confDelete' onClick={() => { deleteMsg(m.codigo_card.toString()) }}>Sim</button>
+                                        <button id='confDelete' onClick={() => deleteMsg(m.codigo_card.toString())}>Sim</button>
                                         <button id='confDelete' onClick={() => setIsOpen(!isOpen)}>Nao</button>
                                     </Popup>
-                                </div>
-                            </button>
-                        ))}
-                    <FiArrowDown id='carouselIcon' onClick={() => { if (Msg.length == 4 && page + 1 < Limit.length / 4) { setPage(page + 1) } }} />
+                                )}
+                            </div>
+                        </button>
+                    ))}
+                    <FiArrowDown id='carouselIcon' onClick={() => {
+                        if (Msg.length === PAGE_SIZE && (page + 1) * PAGE_SIZE < totalCards) setPage(page + 1);
+                    }} />
                 </div>
-                <div >
+                <div>
                     <h2 id='TitleBar'>Lista de cards:</h2>
                     <ul id='CardUl'>
                         <div id='CardForm'>
@@ -235,6 +227,9 @@ const CardBody: React.FC = () => {
                                     <h1>Id do Card: {codigo}</h1>
                                     <h1>Nome: {nome}</h1>
                                     <h1>Descrição: {descricao2}</h1>
+                                    {resumo && <h1>Resumo: {resumo}</h1>}
+                                    {categoriaCard && <h1>Categoria: {categoriaCard}</h1>}
+                                    {tags && <h1>Tags: {tags}</h1>}
                                     <h1>Imagem Link: {imageLink}</h1>
                                     <h1>Thumbnail Link: {thumbnailLink}</h1>
                                     <h1>Data: {data}</h1>
