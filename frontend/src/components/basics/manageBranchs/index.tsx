@@ -43,10 +43,10 @@ const BranchBody: React.FC = () => {
     const [data, setData] = useState('');
     const [userCodigo, setUserCodigo] = useState('');
     const [userNome, setUserNome] = useState('');
-    const [post, setPost] = useState(false);
-    const [descricao, setDescricao] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [descricao2, setDescricao2] = useState("");
+    const [alertState, setAlertState] = React.useState({ show: false, text: '' });
+    const isAdmin = localStorage.getItem('admin') === 'true';
     const history = useHistory();
 
     useEffect(() => {
@@ -64,32 +64,12 @@ const BranchBody: React.FC = () => {
     }, [page]);
 
     const deleteMsg = async (codigo: string) => {
-        if(localStorage.getItem("admin") != 'true'){
-            setDescricao("Você não tem permissão")
-            setPost(!post)
-        }else{
-        const responseDelete = await api.delete('/v1/ts/branchs/' + codigo);
-        window.location.reload()
-        }
+        await api.delete('/v1/ts/branchs/' + codigo);
+        window.location.reload();
     }
 
-    const updateMsg = async () => {
-        if(localStorage.getItem("admin") != 'true'){
-            setDescricao("Você não tem permissão")
-            setPost(!post)
-        }else{
-        history.push('/updateBranch')
-        }
-    }
-
-    const criarNovo = async () => {
-        if(localStorage.getItem("admin") != 'true'){
-            setDescricao("Você não tem permissão")
-            setPost(!post)
-        }else{
-        history.push('/newbranch')
-        }
-    }
+    const updateMsg = () => history.push('/updateBranch');
+    const criarNovo = () => history.push('/newbranch');
 
     const ExibirMsg = async (codigo: string) => {
         const response = await api.get('/v1/ts/branchs/' + codigo);
@@ -101,43 +81,15 @@ const BranchBody: React.FC = () => {
         setUserNome(response.data.userDTO.nome_user)
     }
 
-    useEffect(() => {
-        if (post) {
-            onShowAlert('error')
-        }
-    }, [post])
-
-    const [alert, setAlert] = React.useState({
-        type: 'error',
-        text: descricao,
-        show: false
-    })
-
-    function onCloseAlert() {
-        setAlert({
-            type: '',
-            text: '',
-            show: false
-        })
-        setPost(!post)
-    }
-
-    async function onShowAlert(type: string) {
-        await setAlert({
-            type: type,
-            text: descricao,
-            show: true
-        })
-    }
     return (
         <>
             <Alert
                 header={''}
                 btnText={'Fechar'}
-                text={alert.text}
-                type={alert.type}
-                show={alert.show}
-                onClosePress={onCloseAlert}
+                text={alertState.text}
+                type={'error'}
+                show={alertState.show}
+                onClosePress={() => setAlertState({ show: false, text: '' })}
                 pressCloseOnOutsideClick={true}
                 showBorderBottom={true}
                 alertStyles={{
@@ -172,29 +124,26 @@ const BranchBody: React.FC = () => {
             />
             <body id='BranchBody'>
                 <div id='sidebar' >
-                   
-                        <button id='newObj' onClick={criarNovo}>Criar novo</button>
-                   
+                    {isAdmin && <button id='newObj' onClick={criarNovo}>Criar novo</button>}
                     <FiArrowUp id='carouselIcon' onClick={() => { if (page - 1 >= 0) setPage(page - 1) }} />
-                    {
-                        Msg.map(m => (
-                            <button id='buttons' >
-                                <button id='text' onClick={() => { ExibirMsg(m.codigo_branch.toString()) }}>
-                                    <h6>{m.nome_branch}</h6>
-                                    <h4>{m.descricao_branch}</h4>
-                                </button>
-                                <div id='iconsButtons'>
-                                    
-                                        <FiEdit id='editButton' onClick={updateMsg}></FiEdit>
-                               
-                                    <Popup trigger={<FiTrash id='deleteButton'></FiTrash>} position="center center" open={isOpen}>
+                    {Msg.map(m => (
+                        <button id='buttons' key={m.codigo_branch}>
+                            <button id='text' onClick={() => { ExibirMsg(m.codigo_branch.toString()) }}>
+                                <h6>{m.nome_branch}</h6>
+                                <h4>{m.descricao_branch}</h4>
+                            </button>
+                            <div id='iconsButtons'>
+                                {isAdmin && <FiEdit id='editButton' onClick={updateMsg} />}
+                                {isAdmin && (
+                                    <Popup trigger={<FiTrash id='deleteButton' />} position="center center" open={isOpen}>
                                         <h4 id='popupText'>Tem certeza que deseja excluir?</h4>
-                                        <button id='confDelete' onClick={() => { deleteMsg(m.codigo_branch.toString()) }}>Sim</button>
+                                        <button id='confDelete' onClick={() => deleteMsg(m.codigo_branch.toString())}>Sim</button>
                                         <button id='confDelete' onClick={() => setIsOpen(!isOpen)}>Nao</button>
                                     </Popup>
-                                </div>
-                            </button>
-                        ))}
+                                )}
+                            </div>
+                        </button>
+                    ))}
                     <FiArrowDown id='carouselIcon' onClick={() => { if (Msg.length == 4 && page + 1 < Limit.length / 4) { setPage(page + 1) } }}/>
                 </div>
                 <div >
