@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.env.Environment;
 import java.util.Arrays;
 @EnableAutoConfiguration
 @ComponentScan
@@ -25,6 +26,8 @@ public class BackendTsApplication implements CommandLineRunner {
 	private FolderDAO folderDAO;
 	@Autowired
 	private CardDAO cardDAO;
+	@Autowired
+	private Environment environment;
 
 	public static void main(String[] args) {
 		SpringApplication.run(BackendTsApplication.class, args);
@@ -32,6 +35,9 @@ public class BackendTsApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception{
+		if (Arrays.asList(environment.getActiveProfiles()).contains("h2")) {
+			return;
+		}
 
 		User u1 = new User(1L, "nome1" , "desc1", "senha1", true, true, true, true, true, 1L);
 		User u2 = new User(2L, "nome2" , "desc2", "senha2", true, true, true, true, false, 2L);
