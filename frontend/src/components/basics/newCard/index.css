@@ -86,3 +86,125 @@
     width: 8vw;
     height: 4vh;
 }
+
+/* Seções de IA */
+#ia-section {
+    width: 30vw;
+    padding: 14px 16px;
+    margin: 8px 0;
+    background: #f0f4ff;
+    border-radius: 8px;
+    border: 1px solid #c5cae9;
+}
+
+#ia-section h3 {
+    font-size: 15px;
+    margin: 0 0 8px 0;
+    color: #3949ab;
+}
+
+#btn-ia {
+    background: #3949ab;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    margin: 0 0 10px 0 !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+#btn-ia:disabled {
+    background: #9fa8da;
+    cursor: not-allowed;
+}
+
+#ia-resumo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#ia-resumo label {
+    font-size: 13px;
+    color: #555;
+}
+
+#textarea-resumo {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #c5cae9;
+    font-size: 13px;
+    resize: vertical;
+}
+
+#btn-descartar {
+    background: #ffebee !important;
+    color: #c62828 !important;
+    border: 1px solid #ef9a9a !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+#ia-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#categoria-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#categoria-box label {
+    font-size: 13px;
+    color: #555;
+    white-space: nowrap;
+}
+
+#input-categoria {
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid #c5cae9;
+    font-size: 13px;
+    width: 180px;
+}
+
+#tags-chips label {
+    font-size: 13px;
+    color: #555;
+}
+
+#chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.tag-chip {
+    background: #e8eaf6;
+    border: 1px solid #9fa8da;
+    border-radius: 16px;
+    padding: 3px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #283593;
+    user-select: none;
+}
+
+.tag-chip:hover {
+    background: #ffcdd2;
+    border-color: #ef9a9a;
+    color: #c62828;
+}

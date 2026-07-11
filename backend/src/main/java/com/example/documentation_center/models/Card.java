@@ -34,6 +34,15 @@ public class Card implements Serializable {
     @Column(name = "data", nullable = false)
     private LocalDate dataHora;
 
+    @Column(name = "resumo", length = 500)
+    private String resumo;
+
+    @Column(name = "tags", length = 300)
+    private String tags;
+
+    @Column(name = "categoria", length = 100)
+    private String categoria;
+
     //@ManyToOne
     //private Folder folderObj;
 
@@ -147,6 +156,30 @@ public class Card implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getId(), getNome(), getDescricao(), getImageLink(), getThumbnail(), getDataHora(), getIdFolder(), getIdBranch(), getIdUser());
+    }
+
+    public String getResumo() {
+        return resumo;
+    }
+
+    public void setResumo(String resumo) {
+        this.resumo = resumo;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 }
 

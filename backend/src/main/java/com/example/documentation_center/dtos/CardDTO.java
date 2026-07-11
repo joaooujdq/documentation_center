@@ -35,6 +35,18 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
     private String thumbnail;
     private LocalDate dataHora;
 
+    @Size(max = 500)
+    @JsonProperty("resumo_card")
+    private String resumo;
+
+    @Size(max = 300)
+    @JsonProperty("tags_card")
+    private String tags;
+
+    @Size(max = 100)
+    @JsonProperty("categoria_card")
+    private String categoria;
+
     //@ConvertGroup(from = Default.class, to = ValidationsGroups.FolderId.class)
     //@Valid
     //private FolderDTO folderDTO;
@@ -48,6 +60,21 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
     //private UserDTO userDTO;
 
     public CardDTO() {
+    }
+
+    public CardDTO(Card obj) {
+        key = obj.getId();
+        nome = obj.getNome();
+        descricao = obj.getDescricao();
+        imageLink = obj.getImageLink();
+        thumbnail = obj.getThumbnail();
+        dataHora = obj.getDataHora();
+        resumo = obj.getResumo();
+        tags = obj.getTags();
+        categoria = obj.getCategoria();
+        idFolder = obj.getIdFolder();
+        idBranch = obj.getIdBranch();
+        idUser = obj.getIdUser();
     }
 
     public Long getKey() {
@@ -133,4 +160,13 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
     public int hashCode() {
         return Objects.hash(super.hashCode(), getKey(), getIdFolder(), getIdBranch(), getIdUser(), getNome(), getDescricao(), getImageLink(), getThumbnail(), getDataHora());
     }
+
+    public String getResumo() { return resumo; }
+    public void setResumo(String resumo) { this.resumo = resumo; }
+
+    public String getTags() { return tags; }
+    public void setTags(String tags) { this.tags = tags; }
+
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
 }
