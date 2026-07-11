@@ -105,11 +105,11 @@ public class CardServices {
         boolean temCategoria = categoria != null && !categoria.isBlank();
         Page<Card> result;
         if (temNome && temCategoria) {
-            result = cardDAO.findByNomeContainsAndCategoria(nome, categoria, pageable);
+            result = cardDAO.findByNomeContainsIgnoreCaseAndCategoriaIgnoreCase(nome, categoria, pageable);
         } else if (temNome) {
-            result = cardDAO.findByNomeContains(nome, pageable);
+            result = cardDAO.findByNomeContainsIgnoreCase(nome, pageable);
         } else if (temCategoria) {
-            result = cardDAO.findByCategoriaContains(categoria, pageable);
+            result = cardDAO.findByCategoriaIgnoreCase(categoria, pageable);
         } else {
             result = cardDAO.findAll(pageable);
         }
