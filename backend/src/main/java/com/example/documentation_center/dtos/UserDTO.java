@@ -4,58 +4,33 @@ import com.example.documentation_center.dtos.ValidationsGroups.UserId;
 import com.example.documentation_center.models.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.github.dozermapper.core.Mapping;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
-@JsonPropertyOrder({"codigo_user", "nome_user",  "descricao_user", "senha_user", "admin_user", "data_user"})
-public class UserDTO extends RepresentationModel<UserDTO>  {
+public class UserDTO extends RepresentationModel<UserDTO> implements Serializable {
 
-    @JsonProperty("codigo_user")
-    private Integer codigo;
+    private static final long serialVersionUID = 1L;
 
-    @NotBlank
-    @Size(max = 60)
-    @JsonProperty("nome_user")
+    @Mapping("id")
+    @JsonProperty("id")
+    private Long key;
     private String nome;
-
-    @JsonProperty("descricao_user")
     private String descricao;
-
-    @NotBlank
-    @Size(max = 60)
-    @JsonProperty("senha_user")
     private String senha;
-
-    @JsonProperty("admin_user")
-    private String admin;
-
-    @JsonProperty("data_user")
+    private Boolean admin;
     private LocalDate dataHora;
 
 
     public UserDTO(){
 
-    }
-
-    public UserDTO(User obj) {
-        codigo = obj.getCodigo();
-        nome = obj.getNome();
-        descricao = obj.getDescricao();
-        senha = obj.getSenha();
-        admin = obj.getAdmin();
-        dataHora = obj.getDataHora();
-    }
-
-    public Integer getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(Integer codigo) {
-        this.codigo = codigo;
     }
 
     public LocalDate getDataHora() {
@@ -66,11 +41,11 @@ public class UserDTO extends RepresentationModel<UserDTO>  {
         this.dataHora = dataHora;
     }
 
-    public String getAdmin() {
+    public Boolean getAdmin() {
         return admin;
     }
 
-    public void setAdmin(String admin) {
+    public void setAdmin(Boolean admin) {
         this.admin = admin;
     }
 
@@ -90,11 +65,31 @@ public class UserDTO extends RepresentationModel<UserDTO>  {
         this.nome = nome;
     }
 
+    public Long getKey() {
+        return key;
+    }
+
+    public void setKey(Long key) {
+        this.key = key;
+    }
+
     public String getDescricao() {
         return descricao;
     }
 
     public void setDescricao(String descricao) {
         this.descricao = descricao;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UserDTO userDTO)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(getKey(), userDTO.getKey()) && Objects.equals(getNome(), userDTO.getNome()) && Objects.equals(getDescricao(), userDTO.getDescricao()) && Objects.equals(getSenha(), userDTO.getSenha()) && Objects.equals(getAdmin(), userDTO.getAdmin()) && Objects.equals(getDataHora(), userDTO.getDataHora());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getKey(), getNome(), getDescricao(), getSenha(), getAdmin(), getDataHora());
     }
 }

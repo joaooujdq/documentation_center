@@ -1,6 +1,8 @@
 package com.example.documentation_center.services;
 
+import com.example.documentation_center.converter.DozerConverter;
 import com.example.documentation_center.dtos.CardDTO;
+import com.example.documentation_center.exception.ResourceNotFoundException;
 import com.example.documentation_center.models.Branch;
 import com.example.documentation_center.models.Card;
 import com.example.documentation_center.models.Folder;
@@ -10,6 +12,7 @@ import com.example.documentation_center.repositories.CardDAO;
 import com.example.documentation_center.repositories.FolderDAO;
 import com.example.documentation_center.repositories.UserDAO;
 import com.example.documentation_center.services.exceptions.BusinessException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,91 +22,72 @@ import java.util.Optional;
 
 @Service
 public class CardServices {
-    private CardDAO cardDAO;
-    private BranchDAO branchDAO;
-    private FolderDAO folderDAO;
-    private UserDAO userDAO;
+    @Autowired
+    CardDAO cardDAO;
 
-    @Transactional
-    public CardDTO save(CardDTO obj) {
-        if(obj.getNome()=="" ){
-            throw new BusinessException("Os campos com * são obrigatórios!");
+    public CardDTO create(CardDTO cardDTO) {
+        var entity = DozerConverter.parseObject(cardDTO, Card.class);
+        return DozerConverter.parseObject(cardDAO.save(entity), CardDTO.class);
+    }
+
+    public Page<CardDTO> findCardByName(String name, Pageable pageable) {
+        var page = cardDAO.findCardByNome(name, pageable);
+        return page.map(this::convertToCardDTO);
+    }
+
+    public CardDTO findCardByName(String name) {
+        var entity = cardDAO.findCardByNome(name);
+        if (entity != null) {
+            return DozerConverter.parseObject(entity, CardDTO.class);
+        } else {
+            throw new ResourceNotFoundException("Card " + name + " not found!");
         }
-        Optional<Folder> folder = folderDAO.findById(obj.getFolderDTO().getCodigo());
-        Card entity = new Card(obj.getCodigo() ,obj.getThumbnail(), obj.getImageLink(), obj.getDescricao(), obj.getNome(),
-                new Folder(folder.get().getCodigo(), folder.get().getDescricao(), folder.get().getNome(),
-                        new Branch(folder.get().getBranchObj().getCodigo(), folder.get().getBranchObj().getDescricao(), folder.get().getBranchObj().getNome(),
-                                new User(folder.get().getBranchObj().getUserObj().getCodigo(), folder.get().getBranchObj().getUserObj().getAdmin(), folder.get().getBranchObj().getUserObj().getNome(), folder.get().getBranchObj().getUserObj().getDescricao(), folder.get().getBranchObj().getUserObj().getSenha()))));
-        return new CardDTO(cardDAO.save(entity));
     }
 
-    @Transactional(readOnly = true)
     public Page<CardDTO> findAll(Pageable pageable) {
-        Page<Card> result = cardDAO.findAll(pageable);
-        return result.map(obj -> new CardDTO(obj));
+        var page = cardDAO.findAll(pageable);
+        return page.map(this::convertToCardDTO);
     }
 
-    @Transactional(readOnly = true)
-    public CardDTO findById(Integer id) {
-        Card result = cardDAO.findById(id).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new CardDTO(result);
+    private CardDTO convertToCardDTO(Card entity) {
+        return DozerConverter.parseObject(entity, CardDTO.class);
     }
 
-    @Transactional(readOnly = true)
-    public boolean existById(Integer id) {
-        return cardDAO.existsById(id);
+    public CardDTO findById(Long id) {
+        var entity = cardDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+        return DozerConverter.parseObject(entity, CardDTO.class);
     }
 
-    /*@Transactional(readOnly = true)
-    public CardDTO findByEmail(String email) {
-        Card result = cardDAO.findByEmail(email).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new CardDTO(result);
+    public CardDTO update(CardDTO card) {
+        var entity = cardDAO.findById(card.getKey())
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+
+        //entity.setId(card.getKey());
+        entity.setIdBranch(card.getIdBranch());
+        entity.setIdFolder(card.getIdFolder());
+        entity.setIdUser(card.getIdUser());
+        entity.setNome(card.getNome());
+        entity.setDescricao(card.getDescricao());
+        entity.setThumbnail(card.getThumbnail());
+        entity.setImageLink(card.getImageLink());
+        entity.setDataHora(card.getDataHora());
+
+        return DozerConverter.parseObject(cardDAO.save(entity), CardDTO.class);
+    }
+
+  /*  @Transactional
+    public AddressVO disableUser(Long id) {
+        //cardDAO.disableCard(id);
+        var entity = cardDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+        cardDAO.disablePerson(id);
+        return DozerConverter.parseObject(entity, AddressVO.class);
     }*/
 
-    @Transactional
-    public CardDTO update(CardDTO obj) {
-        Card entity = cardDAO.findById(obj.getCodigo()).orElseThrow(() -> new BusinessException("Registros não encontrados!!!"));
-        entity.setNome(obj.getNome());
-        entity.setDescricao(obj.getDescricao());
-        entity.setImageLink(obj.getImageLink());
-        entity.setThumbnail(obj.getThumbnail());
-        entity.setDataHora(obj.getDataHora());
-        return new CardDTO(cardDAO.save(entity));
+    public void delete(Long id) {
+        Card entity = cardDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+        cardDAO.delete(entity);
     }
-
-    @Transactional(readOnly = true)
-    public CardDTO findByNome(String nome) {
-        Card result = cardDAO.findByNome(nome).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new CardDTO(result);
-    }
-
-    @Transactional
-    public void deleteById(Integer id) {
-        cardDAO.deleteById(id);
-    }
-
-    public Page<CardDTO> findByNomeContains(String nome, Pageable pageable) {
-        Page<Card> result = cardDAO.findByNomeContains(nome, pageable);
-        return result.map(obj -> new CardDTO(obj));
-    }
-
-    /*public Page<CardDTO> findByRazaoContains(String razao, Pageable pageable) {
-        Page<Card> result = cardDAO.findByRazaoContains(razao, pageable);
-        return result.map(obj -> new CardDTO(obj));
-    }
-
-    public Page<CardDTO> findByEnderecoContains(String endereco, Pageable pageable) {
-        Page<Card> result = cardDAO.findByEnderecoContains(endereco, pageable);
-        return result.map(obj -> new CardDTO(obj));
-    }*/
-
-    //<editor-fold defaultstate="collapsed" desc="delombok">
-    @SuppressWarnings("all")
-    public CardServices(CardDAO cardDAO, FolderDAO folderDAO, BranchDAO branchDAO, UserDAO userDAO) {
-        this.cardDAO = cardDAO;
-        this.folderDAO = folderDAO;
-        this.branchDAO = branchDAO;
-        this.userDAO = userDAO;
-    }
-    //</editor-fold>
 }

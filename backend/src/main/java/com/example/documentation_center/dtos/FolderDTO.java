@@ -6,75 +6,67 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.validation.groups.ConvertGroup;
-import javax.validation.groups.Default;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.ConvertGroup;
+import jakarta.validation.groups.Default;
+import com.github.dozermapper.core.Mapping;
+
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Objects;
 
-@JsonPropertyOrder({"codigo_folder", "nome_folder", "descricao_folder", "data_folder"})
-public class FolderDTO extends RepresentationModel<FolderDTO> {
+public class FolderDTO extends RepresentationModel<FolderDTO> implements Serializable {
 
-    @JsonProperty("codigo_folder")
-    private Integer codigo;
+    private static final long serialVersionUID = 1L;
 
-    @NotBlank
-    @Size(max = 60)
-    @JsonProperty("nome_folder")
+    @Mapping("id")
+    @JsonProperty("id")
+    //private Integer codigo;
+    private Long key;
+    private Long idBranch;
+    private Long idUser;
     private String nome;
-
-
-    @Size(max = 255)
-    @JsonProperty("descricao_folder")
     private String descricao;
-
-    @JsonProperty("data_folder")
     private LocalDate dataHora;
 
-    @ConvertGroup(from = Default.class, to = ValidationsGroups.BranchId.class)
-    @Valid
-    private BranchDTO branchDTO;
+    //@ConvertGroup(from = Default.class, to = ValidationsGroups.BranchId.class)
+    //@Valid
+    //private BranchDTO branchDTO; {
 
-    @ConvertGroup(from = Default.class, to = ValidationsGroups.UserId.class)
-    @Valid
-    private UserDTO userDTO;
+
+    //@ConvertGroup(from = Default.class, to = ValidationsGroups.UserId.class)
+    //@Valid
+    //private UserDTO userDTO;
 
     public FolderDTO() {
 
     }
 
-    public FolderDTO(Folder obj) {
-        codigo = obj.getCodigo();
-        descricao = obj.getDescricao();
-        branchDTO = new BranchDTO(obj.getBranchObj());
-        dataHora = obj.getDataHora();
-        nome = obj.getNome();
+    public Long getKey() {
+        return key;
     }
 
-    public Integer getCodigo() {
-        return codigo;
+    public void setKey(Long key) {
+        this.key = key;
     }
 
-    public void setCodigo(Integer codigo) {
-        this.codigo = codigo;
+    public Long getIdBranch() {
+        return idBranch;
     }
 
-    public BranchDTO getBranchDTO() {
-        return branchDTO;
+    public void setIdBranch(Long idBranch) {
+        this.idBranch = idBranch;
     }
 
-    public void setBranchDTO(BranchDTO branchDTO) {
-        this.branchDTO = branchDTO;
+    public Long getIdUser() {
+        return idUser;
     }
 
-    public LocalDate getDataHora() {
-        return dataHora;
-    }
-
-    public void setDataHora(LocalDate dataHora) {
-        this.dataHora = dataHora;
+    public void setIdUser(Long idUser) {
+        this.idUser = idUser;
     }
 
     public String getNome() {
@@ -93,11 +85,23 @@ public class FolderDTO extends RepresentationModel<FolderDTO> {
         this.descricao = descricao;
     }
 
-    public UserDTO getUserDTO() {
-        return userDTO;
+    public LocalDate getDataHora() {
+        return dataHora;
     }
 
-    public void setUserDTO(UserDTO userDTO) {
-        this.userDTO = userDTO;
+    public void setDataHora(LocalDate dataHora) {
+        this.dataHora = dataHora;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof FolderDTO folderDTO)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(getKey(), folderDTO.getKey()) && Objects.equals(getIdBranch(), folderDTO.getIdBranch()) && Objects.equals(getIdUser(), folderDTO.getIdUser()) && Objects.equals(getNome(), folderDTO.getNome()) && Objects.equals(getDescricao(), folderDTO.getDescricao()) && Objects.equals(getDataHora(), folderDTO.getDataHora());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getKey(), getIdBranch(), getIdUser(), getNome(), getDescricao(), getDataHora());
     }
 }

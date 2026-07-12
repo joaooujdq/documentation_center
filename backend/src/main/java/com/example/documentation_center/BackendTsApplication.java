@@ -33,30 +33,35 @@ public class BackendTsApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception{
 
-		User u1 = new User(1,  "true", "nome1", "descricao1", "senha1");
-		User u2 = new User(2,  "false", "nome2", "descricao2", "senha2");
-		User u3 = new User(3,  "false", "nome3", "descricao3", "senha3");
-		User u4 = new User(4,  "false", "nome4", "descricao4", "senha4");
-		User u5 = new User(5,  "false", "nome5", "descricao5", "senha5");
-		Branch b1 = new Branch(1, "descricao1", "nome1", u1);
-		Branch b2 = new Branch(2, "descricao2", "nome2", u2);
-		Branch b3 = new Branch(3, "descricao3", "nome3",  u3);
-		Branch b4 = new Branch(4, "descricao4", "nome4",  u4);
-		Branch b5 = new Branch(5, "descricao5", "nome5",  u5);
-		Folder f1 = new Folder(1, "descricao1", "nome1", b1);
-		Folder f2 = new Folder(2, "descricao2", "nome2", b2);
-		Folder f3 = new Folder(3, "descricao3", "nome3",  b3);
-		Folder f4 = new Folder(4, "descricao4", "nome4",  b4);
-		Folder f5 = new Folder(5, "descricao5", "nome5",  b5);
-		Card c1 = new Card(1, "thumbnail1", "imageLink1", "descricao1", "nome1", f1 );
-		Card c2 = new Card(2, "thumbnail2", "imageLink2", "descricao2", "nome2", f2);
-		Card c3 = new Card(3, "thumbnail3", "imageLink3", "descricao3", "nome3", f3);
-		Card c4 = new Card(4, "thumbnail4", "imageLink4", "descricao4", "nome4", f4);
-		Card c5 = new Card(5, "thumbnail5", "imageLink5", "descricao5", "nome5", f5);
+		User u1 = new User(1L, "nome1" , "desc1", "senha1", true, true, true, true, true, 1L);
+		User u2 = new User(2L, "nome2" , "desc2", "senha2", true, true, true, true, false, 2L);
+		User u3 = new User(3L, "nome3" , "desc3", "senha3", true, true, true, true, false, 3L);
+		User u4 = new User(4L, "nome4" , "desc4", "senha4", true, true, true, true, false, 3L);
+		User u5 = new User(5L, "nome5" , "desc5", "senha5", true, true, true, true, false, 4L);
+
+		Branch b1 = new Branch(1L,  "nome1", "desc1");
+		Branch b2 = new Branch(2L,  "nome2", "desc2");
+		Branch b3 = new Branch(3L,  "nome3", "desc3");
+		Branch b4 = new Branch(4L,  "nome4", "desc4");
+		Branch b5 = new Branch(5L,  "nome5", "desc5");
+
+		Folder f1 = new Folder(1L,  1L, 1L, "nome1", "desc1");
+		Folder f2 = new Folder(2L,  3L, 2L, "nome2", "desc2");
+		Folder f3 = new Folder(3L,  3L, 3L, "nome3", "desc3");
+		Folder f4 = new Folder(4L,  2L, 4L, "nome4", "desc4");
+		Folder f5 = new Folder(5L,  5L, 4L, "nome5", "desc5");
+
+		Card c1 = new Card(1L,  "nome1","desc1" , "image1","thumb1" ,1L,1L,1L);
+		Card c2 = new Card(2L,  "nome2","desc2" , "image2","thumb2" ,2L,2L,2L);
+		Card c3 = new Card(3L,  "nome3", "desc3", "image3", "thumb3",3L,3L,3L);
+		Card c4 = new Card(4L,  "nome4","desc4" , "image4", "thumb4",4L,4L,4L);
+		Card c5 = new Card(5L,  "nome5", "desc5", "image5","thumb5" ,5L,5L,5L);
 
 		userDAO.saveAll(Arrays.asList(u1,u2,u3,u4,u5));
 		branchDAO.saveAll(Arrays.asList(b1,b2,b3,b4,b5));
 		folderDAO.saveAll(Arrays.asList(f1,f2,f3,f4,f5));
 		cardDAO.saveAll(Arrays.asList(c1,c2,c3,c4,c5));
+
+
 	}
 }

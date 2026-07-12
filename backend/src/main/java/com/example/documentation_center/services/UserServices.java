@@ -1,101 +1,110 @@
 package com.example.documentation_center.services;
 
+import com.example.documentation_center.converter.DozerConverter;
 import com.example.documentation_center.dtos.UserDTO;
+import com.example.documentation_center.exception.ResourceNotFoundException;
 import com.example.documentation_center.models.User;
 import com.example.documentation_center.repositories.UserDAO;
 import com.example.documentation_center.services.exceptions.BusinessException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
-public class UserServices {
-    private UserDAO userDAO;
+public class UserServices implements UserDetailsService {
 
-    @Transactional(readOnly = true)
-    public Page<UserDTO> findAll(Pageable pageable) {
-        Page<User> result = userDAO.findAll(pageable);
-        return result.map(obj -> new UserDTO(obj));
-    }
+    @Autowired
+    UserDAO userDAO;
 
-    @Transactional(readOnly = true)
-    public UserDTO findById(Integer id) {
-        System.out.println("teste final");
-        User result = userDAO.findById(id).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new UserDTO(result);
-    }
+    //public UserServices(UserDAO userDAO) {
+      //  this.userDAO = userDAO;
+    //}
 
-    @Transactional(readOnly = true)
-    public boolean existById(Integer id) {
-        return userDAO.existsById(id);
-    }
-
-    /*@Transactional(readOnly = true)
-    public UserDTO findByEmail(String email) {
-        User result = userDAO.findByEmail(email).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new UserDTO(result);
-    }*/
-
-    @Transactional
-    public UserDTO update(UserDTO obj) {
-        User entity = userDAO.findById(obj.getCodigo()).orElseThrow(() -> new BusinessException("Registros não encontrados!!!"));
-        entity.setNome(obj.getNome());
-        entity.setSenha(obj.getSenha());
-        entity.setAdmin(obj.getAdmin());
-        entity.setDataHora(obj.getDataHora());
-        return new UserDTO(userDAO.save(entity));
-    }
-
-    @Transactional(readOnly = true)
-    public UserDTO findByNome(String nome) {
-        User result = userDAO.findByNome(nome).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new UserDTO(result);
-    }
-
-    @Transactional(readOnly = true)
-    public UserDTO findBySenha(String senha) { 
-        User result = userDAO.findBySenha(senha).orElseThrow(() -> new BusinessException("Registros não encontrados"));
-        return new UserDTO(result);
-    }
-
-    @Transactional
-    public UserDTO save(UserDTO obj) {
-
-        if(obj.getNome()=="" || obj.getSenha()=="" ) {
-            throw new BusinessException("Os campos com * são obrigatórios!");
-        }
-
-        User entity = new User(obj.getCodigo() ,obj.getAdmin(), obj.getNome(), obj.getDescricao(), obj.getSenha());
-        return new UserDTO(userDAO.save(entity));
-    }
-
-    @Transactional
-    public void deleteById(Integer id) {
-        userDAO.deleteById(id);
-    }
-
-    public Page<UserDTO> findByNomeContains(String nome, Pageable pageable) {
-        Page<User> result = userDAO.findByNomeContains(nome, pageable);
-        return result.map(obj -> new UserDTO(obj));
-    }
-
-    /*public Page<UserDTO> findByRazaoContains(String razao, Pageable pageable) {
-        Page<User> result = userDAO.findByRazaoContains(razao, pageable);
-        return result.map(obj -> new UserDTO(obj));
-    }
-
-    public Page<UserDTO> findByEnderecoContains(String endereco, Pageable pageable) {
-        Page<User> result = userDAO.findByEnderecoContains(endereco, pageable);
-        return result.map(obj -> new UserDTO(obj));
-    }*/
-
-    //<editor-fold defaultstate="collapsed" desc="delombok">
-    @SuppressWarnings("all")
     public UserServices(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
-    //</editor-fold>
+
+    @Override
+    public UserDetails loadUserByUsername(String nome) throws UsernameNotFoundException {
+        //logger.info("Finding one user by name " + nome + "!");
+        var user = userDAO.findByNome(nome);
+        if (user != null) {
+            return user;
+        } else {
+            throw new UsernameNotFoundException("Nome " + nome + " not found!");
+        }
+    }
+
+    public UserDTO create(UserDTO userDTO) {
+        var entity = DozerConverter.parseObject(userDTO, User.class);
+        return DozerConverter.parseObject(userDAO.save(entity), UserDTO.class);
+    }
+
+    public Page<UserDTO> findUserByNome(String firstName, Pageable pageable) {
+        var page = userDAO.findUserByNome(firstName, pageable);
+        return page.map(this::convertToUserDTO);
+    }
+
+    public UserDTO findUserByNome(String nome) {
+        var entity = userDAO.findUserByNome(nome);
+        if (entity != null) {
+            return DozerConverter.parseObject(entity, UserDTO.class);
+        } else {
+            throw new ResourceNotFoundException("Nome " + nome + " not found!");
+        }
+    }
+
+    public Page<UserDTO> findAll(Pageable pageable) {
+        var page = userDAO.findAll(pageable);
+        return page.map(this::convertToUserDTO);
+    }
+
+    private UserDTO convertToUserDTO(User entity) {
+        return DozerConverter.parseObject(entity, UserDTO.class);
+    }
+
+    public UserDTO findById(Long id) {
+        var entity = userDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+        return DozerConverter.parseObject(entity, UserDTO.class);
+    }
+
+    public UserDTO update(UserDTO user) {
+        var entity = userDAO.findById(user.getKey())
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+
+       //entity.setId(entity.getId());
+        entity.setIdBranch(entity.getIdBranch());
+        entity.setNome(entity.getNome());
+        entity.setSenha(entity.getSenha());
+        entity.setDescricao(entity.getDescricao());
+        entity.setAdmin(entity.getAdmin());
+        entity.setDataHora(entity.getDataHora());
+
+        var vo = DozerConverter.parseObject(userDAO.save(entity), UserDTO.class);
+        return vo;
+    }
+
+    @Transactional
+    public UserDTO disableUser(Long id) {
+        //userDAO.disableUser(id);
+        var entity = userDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
+        userDAO.disablePerson(id);
+        return DozerConverter.parseObject(entity, UserDTO.class);
+    }
+
+    public void delete(Long id) {
+        User entity = userDAO.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
+        userDAO.delete(entity);
+    }
+
 }

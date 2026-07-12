@@ -4,18 +4,23 @@ import com.example.documentation_center.models.Card;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface CardDAO extends JpaRepository<Card, Integer> {
+@Repository
+public interface CardDAO extends JpaRepository<Card, Long> {
 
-    Page<Card> findByNomeContains(String searchTerm, Pageable pageable);
-    //Page<Card> findByRazaoContains(String searchTerm, Pageable pageable);
-    //Page<Card> findByEnderecoContains(String searchTerm, Pageable pageable);
+    @Query("SELECT u FROM Card u WHERE u.descricao =:descricao")
+    Card findCardByNome(@Param("descricao") String descricao);
 
-    Optional<Card> findByNome(String nome);
-    //Optional<Card> findByEmail(String email);
-    //Optional<Card> findByCnpj(String cnpj);
-    //Optional<Card> findByTelefone(String telefone);
+    // @Modifying
+    // @Query("UPDATE Person p SET p.enabled = false WHERE p.id =:id")
+    //void disablePerson(@Param("id") Long id);
+
+    @Query("SELECT p FROM Card p WHERE p.descricao LIKE LOWER(CONCAT ('%',:descricao,'%'))")
+    Page<Card> findCardByNome(@Param("descricao") String descricao, Pageable pageable);
 
 }

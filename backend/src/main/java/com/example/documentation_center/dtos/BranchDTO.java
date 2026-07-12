@@ -5,76 +5,58 @@ import com.example.documentation_center.models.Branch;
 import com.example.documentation_center.models.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.github.dozermapper.core.Mapping;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.CascadeType;
-import javax.persistence.OneToMany;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.validation.groups.ConvertGroup;
-import javax.validation.groups.Default;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.groups.ConvertGroup;
+import jakarta.validation.groups.Default;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@JsonPropertyOrder({"codigo_branch", "nome_branch", "descricao_branch", "data_branch"})
-public class BranchDTO extends RepresentationModel<BranchDTO>  {
 
-    @JsonProperty("codigo_branch")
-    private Integer codigo;
+public class BranchDTO extends RepresentationModel<BranchDTO>  implements Serializable {
 
-    @NotBlank
-    @Size(max = 60)
-    @JsonProperty("nome_branch")
+    private static final long serialVersionUID = 1L;
+
+    @Mapping("id")
+    @JsonProperty("id")
+    private Long key;
+    private Long idUser;
     private String nome;
-
-    @Size(max = 255)
-    @JsonProperty("descricao_branch")
     private String descricao;
-
-    @JsonProperty("data_branch")
     private LocalDate dataHora;
 
-    @ConvertGroup(from = Default.class, to = ValidationsGroups.UserId.class)
-    @Valid
-    private UserDTO userDTO;
+    //@ConvertGroup(from = Default.class, to = ValidationsGroups.UserId.class)
+    //@Valid
+    //private UserDTO userDTO;
 
     public BranchDTO(){
 
     }
 
-    public BranchDTO(Branch obj) {
-        codigo = obj.getCodigo();
-        nome = obj.getNome();
-        descricao = obj.getDescricao();
-        dataHora = obj.getDataHora();
-        userDTO = new UserDTO(obj.getUserObj());
+    public Long getKey() {
+        return key;
     }
 
-    public UserDTO getUserDTO() {
-        return userDTO;
+    public void setKey(Long key) {
+        this.key = key;
     }
 
-    public void setUserDTO(UserDTO userDTO) {
-        this.userDTO = userDTO;
+    public Long getIdUser() {
+        return idUser;
     }
 
-    public LocalDate getDataHora() {
-        return dataHora;
-    }
-
-    public void setDataHora(LocalDate dataHora) {
-        this.dataHora = dataHora;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
+    public void setIdUser(Long idUser) {
+        this.idUser = idUser;
     }
 
     public String getNome() {
@@ -85,12 +67,31 @@ public class BranchDTO extends RepresentationModel<BranchDTO>  {
         this.nome = nome;
     }
 
-    public Integer getCodigo() {
-        return codigo;
+    public String getDescricao() {
+        return descricao;
     }
 
-    public void setCodigo(Integer codigo) {
-        this.codigo = codigo;
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
     }
 
+    public LocalDate getDataHora() {
+        return dataHora;
+    }
+
+    public void setDataHora(LocalDate dataHora) {
+        this.dataHora = dataHora;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BranchDTO branchDTO)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(getKey(), branchDTO.getKey()) && Objects.equals(getIdUser(), branchDTO.getIdUser()) && Objects.equals(getNome(), branchDTO.getNome()) && Objects.equals(getDescricao(), branchDTO.getDescricao()) && Objects.equals(getDataHora(), branchDTO.getDataHora());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getKey(), getIdUser(), getNome(), getDescricao(), getDataHora());
+    }
 }

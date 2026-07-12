@@ -15,129 +15,113 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Tag(name = "FolderEndpoint")
 @RestController
-@RequestMapping("/v1/ts/folders")
-@Tag(name = "Endpoint de Folder")
+@RequestMapping("/api/folder/v1")
 public class FolderController {
+
     @Autowired
     private FolderServices service;
-    @GetMapping
-    @Operation(summary = "Busca todos as folders")
-    public ResponseEntity<CollectionModel<FolderDTO>> buscarTodos(
+
+    //@Autowired
+    //private PagedResourcesAssembler<FolderDTO> assembler;
+
+    @Operation(summary = "Find all folder" )
+    @GetMapping(produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<FolderDTO>>findAll(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<FolderDTO> pages = service.findAll(pageable);
-        pages
+            @RequestParam(value="direction", defaultValue = "asc") String direction) {
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+
+        Page<FolderDTO> folder =  service.findAll(pageable);
+        folder
                 .stream()
                 .forEach(p -> p.add(
-                                linkTo(methodOn(FolderController.class).buscarUm(p.getCodigo())).withSelfRel()
+                                linkTo(methodOn(FolderController.class).findById(p.getKey())).withSelfRel()
                         )
                 );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+        //PagedResources<?> resources = assembler.toResource(folder);
+
+        return ResponseEntity.ok(CollectionModel.of(folder));
     }
-    @GetMapping("/nomes")
-    @Operation(summary = "Busca pelo nome")
-    public ResponseEntity<CollectionModel<FolderDTO>> buscarPeloNome(
+
+
+    @Operation(summary = "Find folder by name" )
+    @GetMapping(value = "/findFolderByName/{description}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<FolderDTO>> findPersonByName(
+            @PathVariable("description") String description,
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String nomes) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<FolderDTO> pages = service.findByNomeContains(nomes, pageable);
-        pages
+            @RequestParam(value="direction", defaultValue = "asc") String direction) {
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+
+        Page<FolderDTO> folder =  service.findFolderByNome(description, pageable);
+        folder
                 .stream()
                 .forEach(p -> p.add(
-                                linkTo(methodOn(FolderController.class).buscarUm(p.getCodigo())).withSelfRel()
+                                linkTo(methodOn(FolderController.class).findById(p.getKey())).withSelfRel()
                         )
                 );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+        //PagedResources<?> resources = assembler.toResource(folder);
+
+        return ResponseEntity.ok(CollectionModel.of(folder));
     }
-    /*@GetMapping("/razao")
-    @Operation(summary = "Busca pela razao")
-    public ResponseEntity<CollectionModel<FolderDTO>> buscarPelaRazao(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String razao) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<FolderDTO> pages = service.findByRazaoContains(razao, pageable);
-        pages
-                .stream()
-                .forEach(p -> p.add(
-                                linkTo(methodOn(FolderController.class).buscarUm(p.getCodigo())).withSelfRel()
-                        )
-                );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+    @Operation(summary = "Find a specific folder by your ID" )
+    @GetMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public FolderDTO findById(@PathVariable("id") Long id) {
+        FolderDTO folderDTO = service.findById(id);
+        folderDTO.add(linkTo(methodOn(FolderController.class).findById(id)).withSelfRel());
+        return folderDTO;
     }
-    @GetMapping("/endereco")
-    @Operation(summary = "Busca pelo endereco")
-    public ResponseEntity<CollectionModel<FolderDTO>> buscarPeloEndereco(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String endereco) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<FolderDTO> pages = service.findByEnderecoContains(endereco, pageable);
-        pages
-                .stream()
-                .forEach(p -> p.add(
-                                linkTo(methodOn(FolderController.class).buscarUm(p.getCodigo())).withSelfRel()
-                        )
-                );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+    @Operation(summary = "Create a new folder")
+    @PostMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+            consumes = { "application/json", "application/xml", "application/x-yaml" })
+    public FolderDTO create(@RequestBody FolderDTO folder) {
+        FolderDTO folderDTO = service.create(folder);
+        folderDTO.add(linkTo(methodOn(FolderController.class).findById(folderDTO.getKey())).withSelfRel());
+        return folderDTO;
+    }
+
+    @Operation(summary = "Update a specific folder")
+    @PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+            consumes = { "application/json", "application/xml", "application/x-yaml" })
+    public FolderDTO update(@RequestBody FolderDTO folder) {
+        FolderDTO folderDTO = service.update(folder);
+        folderDTO.add(linkTo(methodOn(FolderController.class).findById(folderDTO.getKey())).withSelfRel());
+        return folderDTO;
+    }
+
+
+/*    @ApiOperation(value = "Disable a folder by your ID" )
+    @PatchMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public FolderDTO disablePerson(@PathVariable("id") Long id) {
+        FolderDTO folderDTO = service.disableFolder(id);
+        folderDTO.add(linkTo(methodOn(FolderController.class).findById(id)).withSelfRel());
+        return folderDTO;
     }*/
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Busca por Id")
-    public ResponseEntity<FolderDTO> buscarUm(@PathVariable Integer id) {
-        FolderDTO objDTO = service.findById(id);
-        objDTO.add(linkTo(methodOn(FolderController.class).buscarUm(id)).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }
-/*    @GetMapping("/nome/{nome}")
-    @Operation(summary = "Busca pelo Nome")
-    public ResponseEntity<FolderDTO> buscarFolder(@PathVariable String folder) {
-        FolderDTO objDTO = service.findByNome(folder);
-        objDTO.add(linkTo(methodOn(FolderController.class).buscarFolder(folder)).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }*/
-    @PutMapping
-    @Operation(summary = "Atualiza uma Folder")
-    public ResponseEntity<FolderDTO> atualizar(@RequestBody FolderDTO objBody) {
-        FolderDTO objDTO = service.save(objBody);
-        objDTO.add(linkTo(methodOn(FolderController.class).buscarUm(objDTO.getCodigo())).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Insere uma folder")
-    public ResponseEntity<FolderDTO> incluir(@Valid @RequestBody  FolderDTO obj){
-        FolderDTO objDTO = service.save(obj);
-        objDTO.add(linkTo(methodOn(FolderController.class).buscarUm(objDTO.getCodigo())).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }
+    @Operation(summary = "Delete a specific folder by your ID")
     @DeleteMapping("/{id}")
-    @Operation(summary = "Exclui uma folder pelo id")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id){
-        if(!service.existById(id)){
-            return ResponseEntity.notFound().build();
-        }
-        service.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+        service.delete(id);
+        return ResponseEntity.ok().build();
     }
+
+
 }

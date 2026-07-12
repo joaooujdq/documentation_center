@@ -16,127 +16,107 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Tag(name = "UserEndpoint")
 @RestController
-@RequestMapping("/v1/ts/users")
-@Tag(name = "Endpoint de User")
+@RequestMapping("/api/user/v1")
 public class UserController {
+
     @Autowired
     private UserServices service;
-    @GetMapping
-    @Operation(summary = "Busca todos as users")
-    public ResponseEntity<CollectionModel<UserDTO>> buscarTodos(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(value="limit", defaultValue = "16") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<UserDTO> pages = service.findAll(pageable);
-        pages
-                .stream()
-                .forEach(p -> p.add(
-                                linkTo(methodOn(UserController.class).buscarUm(p.getCodigo())).withSelfRel()
-                        )
-                );
-        return ResponseEntity.ok(CollectionModel.of(pages));
-    }
-    @GetMapping("/nomes")
-    @Operation(summary = "Busca pelo nome")
-    public ResponseEntity<UserDTO> buscarPeloNome(String nomes, String senhas) {
-        UserDTO objDTO1 = service.findByNome(nomes);
-        UserDTO objDTO2 = service.findBySenha(senhas);
-        if(objDTO2.getSenha() == objDTO1.getSenha()){
-            System.out.println("perfil encontrado");
-        }else{
-            System.out.println("perfil não encontrado");
-            throw new BusinessException("Perfil nao encontrado!");
-        }
 
-        return ResponseEntity.ok(objDTO1);
-    }
+    //@Autowired
+    //private PagedResourcesAssembler<UserDTO> assembler;
 
-    /*@GetMapping("/razao")
-    @Operation(summary = "Busca pela razao")
-    public ResponseEntity<CollectionModel<UserDTO>> buscarPelaRazao(
+    @Operation(summary = "Find all users" )
+    @GetMapping(produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<UserDTO>> findAll(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String razao) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<UserDTO> pages = service.findByRazaoContains(razao, pageable);
-        pages
+            @RequestParam(value="direction", defaultValue = "asc") String direction) {
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+
+        Page<UserDTO> users =  service.findAll(pageable);
+        users
                 .stream()
                 .forEach(p -> p.add(
-                                linkTo(methodOn(UserController.class).buscarUm(p.getCodigo())).withSelfRel()
+                                linkTo(methodOn(UserController.class).findById(p.getKey())).withSelfRel()
                         )
                 );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+        return ResponseEntity.ok(CollectionModel.of(users));
     }
-    @GetMapping("/endereco")
-    @Operation(summary = "Busca pelo endereco")
-    public ResponseEntity<CollectionModel<UserDTO>> buscarPeloEndereco(
+
+
+    @Operation(summary = "Find users by name" )
+    @GetMapping(value = "/findUserByUsername/{username}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<UserDTO>> findPersonByName(
+            @PathVariable("username") String username,
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String endereco) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<UserDTO> pages = service.findByEnderecoContains(endereco, pageable);
-        pages
+            @RequestParam(value="direction", defaultValue = "asc") String direction) {
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+
+        Page<UserDTO> users =  service.findUserByNome(username, pageable);
+        users
                 .stream()
                 .forEach(p -> p.add(
-                                linkTo(methodOn(UserController.class).buscarUm(p.getCodigo())).withSelfRel()
+                                linkTo(methodOn(UserController.class).findById(p.getKey())).withSelfRel()
                         )
                 );
-        return ResponseEntity.ok(CollectionModel.of(pages));
-    }*/
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Busca por Id")
-    public ResponseEntity<UserDTO> buscarUm(@PathVariable Integer id) {
-        UserDTO objDTO = service.findById(id);
-        objDTO.add(linkTo(methodOn(UserController.class).buscarUm(id)).withSelfRel());
-        return ResponseEntity.ok(objDTO);
+        return ResponseEntity.ok(CollectionModel.of(users));
     }
-/*    @GetMapping("/nome/{nome}")
-    @Operation(summary = "Busca pelo Nome")
-    public ResponseEntity<UserDTO> buscarUser(@PathVariable String user) {
-        UserDTO objDTO = service.findByNome(user);
-        objDTO.add(linkTo(methodOn(UserController.class).buscarUser(user)).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }*/
-    @PutMapping
-    @Operation(summary = "Atualiza uma User")
-    public ResponseEntity<UserDTO> atualizar(@RequestBody UserDTO objBody) {
-        UserDTO objDTO = service.save(objBody);
-        objDTO.add(linkTo(methodOn(UserController.class).buscarUm(objDTO.getCodigo())).withSelfRel());
-        return ResponseEntity.ok(objDTO);
+
+    @Operation(summary = "Find a specific user by your ID" )
+    @GetMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public UserDTO findById(@PathVariable("id") Long id) {
+        UserDTO userDTO = service.findById(id);
+        userDTO.add(linkTo(methodOn(UserController.class).findById(id)).withSelfRel());
+        return userDTO;
     }
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Insere uma user")
-    public ResponseEntity<UserDTO> incluir(@RequestBody  UserDTO obj){
-        UserDTO objDTO = service.save(obj);
-        System.out.println("teste1");
-        objDTO.add(linkTo(methodOn(UserController.class).buscarUm(objDTO.getCodigo())).withSelfRel());
-        System.out.println("teste2");
-        return ResponseEntity.ok(objDTO);
+
+    @Operation(summary = "Create a new user")
+    @PostMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+            consumes = { "application/json", "application/xml", "application/x-yaml" })
+    public UserDTO create(@RequestBody UserDTO user) {
+        UserDTO userDTO = service.create(user);
+        userDTO.add(linkTo(methodOn(UserController.class).findById(userDTO.getKey())).withSelfRel());
+        return userDTO;
     }
+
+    @Operation(summary = "Update a specific person")
+    @PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+            consumes = { "application/json", "application/xml", "application/x-yaml" })
+    public UserDTO update(@RequestBody UserDTO user) {
+        UserDTO userDTO = service.update(user);
+        userDTO.add(linkTo(methodOn(UserController.class).findById(userDTO.getKey())).withSelfRel());
+        return userDTO;
+    }
+
+
+    @Operation(summary = "Disable a user by your ID" )
+    @PatchMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public UserDTO disablePerson(@PathVariable("id") Long id) {
+        UserDTO userDTO = service.disableUser(id);
+        userDTO.add(linkTo(methodOn(UserController.class).findById(id)).withSelfRel());
+        return userDTO;
+    }
+
+    @Operation(summary = "Delete a specific user by your ID")
     @DeleteMapping("/{id}")
-    @Operation(summary = "Exclui uma user pelo id")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id){
-        if(!service.existById(id)){
-            return ResponseEntity.notFound().build();
-        }
-        service.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+        service.delete(id);
+        return ResponseEntity.ok().build();
     }
 }

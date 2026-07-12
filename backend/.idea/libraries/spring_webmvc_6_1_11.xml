@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="spring-webmvc-6.1.11">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/spring-webmvc/6.1.11/spring-webmvc-6.1.11.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -11,9 +11,9 @@ public class OpenApiConfig {
     public OpenAPI customOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API RESTful Sistemas de Recados")
+                        .title("API Documentation Center")
                         .version("V1")
-                        .description("Sistema de Recadosss")
+                        .description("Documentation Center")
                         .termsOfService("http://swagger.io/terms")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }

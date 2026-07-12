@@ -15,129 +15,113 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Tag(name = "CardEndpoint")
 @RestController
-@RequestMapping("/v1/ts/cards")
-@Tag(name = "Endpoint de Card")
+@RequestMapping("/api/card/v1")
 public class CardController {
+
     @Autowired
     private CardServices service;
-    @GetMapping
-    @Operation(summary = "Busca todos as cards")
-    public ResponseEntity<CollectionModel<CardDTO>> buscarTodos(
+
+    //@Autowired
+    //private PagedResourcesAssembler<CardDTO> assembler;
+
+    @Operation(summary = "Find all card" )
+    @GetMapping(produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<CardDTO>>findAll(
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<CardDTO> pages = service.findAll(pageable);
-        pages
+            @RequestParam(value="direction", defaultValue = "asc") String direction) {
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+
+        Page<CardDTO> card =  service.findAll(pageable);
+        card
                 .stream()
                 .forEach(p -> p.add(
-                                linkTo(methodOn(CardController.class).buscarUm(p.getCodigo())).withSelfRel()
+                                linkTo(methodOn(CardController.class).findById(p.getKey())).withSelfRel()
                         )
                 );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+        //PagedResources<?> resources = assembler.toResource(card);
+
+        return ResponseEntity.ok(CollectionModel.of(card));
     }
-    @GetMapping("/nomes")
-    @Operation(summary = "Busca pelo nome")
-    public ResponseEntity<CollectionModel<CardDTO>> buscarPeloNome(
+
+
+    @Operation(summary = "Find card by name" )
+    @GetMapping(value = "/findCardByName/{description}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<CardDTO>> findPersonByName(
+            @PathVariable("description") String description,
             @RequestParam(value="page", defaultValue = "0") int page,
             @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String nomes) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<CardDTO> pages = service.findByNomeContains(nomes, pageable);
-        pages
+            @RequestParam(value="direction", defaultValue = "asc") String direction) {
+
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+
+        Page<CardDTO> card =  service.findCardByName(description, pageable);
+        card
                 .stream()
                 .forEach(p -> p.add(
-                                linkTo(methodOn(CardController.class).buscarUm(p.getCodigo())).withSelfRel()
+                                linkTo(methodOn(CardController.class).findById(p.getKey())).withSelfRel()
                         )
                 );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+        //PagedResources<?> resources = assembler.toResource(card);
+
+        return ResponseEntity.ok(CollectionModel.of(card));
     }
-    /*@GetMapping("/razao")
-    @Operation(summary = "Busca pela razao")
-    public ResponseEntity<CollectionModel<CardDTO>> buscarPelaRazao(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String razao) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<CardDTO> pages = service.findByRazaoContains(razao, pageable);
-        pages
-                .stream()
-                .forEach(p -> p.add(
-                                linkTo(methodOn(CardController.class).buscarUm(p.getCodigo())).withSelfRel()
-                        )
-                );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+    @Operation(summary = "Find a specific card by your ID" )
+    @GetMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public CardDTO findById(@PathVariable("id") Long id) {
+        CardDTO cardDTO = service.findById(id);
+        cardDTO.add(linkTo(methodOn(CardController.class).findById(id)).withSelfRel());
+        return cardDTO;
     }
-    @GetMapping("/endereco")
-    @Operation(summary = "Busca pelo endereco")
-    public ResponseEntity<CollectionModel<CardDTO>> buscarPeloEndereco(
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "desc") String direction,
-            @RequestParam(value="ordenation", defaultValue = "codigo") String ordenation,
-            String endereco) {
-        Sort.Direction sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, ordenation));
-        Page<CardDTO> pages = service.findByEnderecoContains(endereco, pageable);
-        pages
-                .stream()
-                .forEach(p -> p.add(
-                                linkTo(methodOn(CardController.class).buscarUm(p.getCodigo())).withSelfRel()
-                        )
-                );
-        return ResponseEntity.ok(CollectionModel.of(pages));
+
+    @Operation(summary = "Create a new card")
+    @PostMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+            consumes = { "application/json", "application/xml", "application/x-yaml" })
+    public CardDTO create(@RequestBody CardDTO card) {
+        CardDTO cardDTO = service.create(card);
+        cardDTO.add(linkTo(methodOn(CardController.class).findById(cardDTO.getKey())).withSelfRel());
+        return cardDTO;
+    }
+
+    @Operation(summary = "Update a specific card")
+    @PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+            consumes = { "application/json", "application/xml", "application/x-yaml" })
+    public CardDTO update(@RequestBody CardDTO card) {
+        CardDTO cardDTO = service.update(card);
+        cardDTO.add(linkTo(methodOn(CardController.class).findById(cardDTO.getKey())).withSelfRel());
+        return cardDTO;
+    }
+
+
+/*    @ApiOperation(value = "Disable a card by your ID" )
+    @PatchMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public CardDTO disablePerson(@PathVariable("id") Long id) {
+        CardDTO cardDTO = service.disableCard(id);
+        cardDTO.add(linkTo(methodOn(CardController.class).findById(id)).withSelfRel());
+        return cardDTO;
     }*/
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Busca por Id")
-    public ResponseEntity<CardDTO> buscarUm(@PathVariable Integer id) {
-        CardDTO objDTO = service.findById(id);
-        objDTO.add(linkTo(methodOn(CardController.class).buscarUm(id)).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }
-/*    @GetMapping("/nome/{nome}")
-    @Operation(summary = "Busca pelo Nome")
-    public ResponseEntity<CardDTO> buscarCard(@PathVariable String card) {
-        CardDTO objDTO = service.findByNome(card);
-        objDTO.add(linkTo(methodOn(CardController.class).buscarCard(card)).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }*/
-    @PutMapping
-    @Operation(summary = "Atualiza uma Card")
-    public ResponseEntity<CardDTO> atualizar(@RequestBody CardDTO objBody) {
-        CardDTO objDTO = service.save(objBody);
-        objDTO.add(linkTo(methodOn(CardController.class).buscarUm(objDTO.getCodigo())).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Insere uma card")
-    public ResponseEntity<CardDTO> incluir(@Valid @RequestBody  CardDTO obj){
-        CardDTO objDTO = service.save(obj);
-        objDTO.add(linkTo(methodOn(CardController.class).buscarUm(objDTO.getCodigo())).withSelfRel());
-        return ResponseEntity.ok(objDTO);
-    }
+    @Operation(summary = "Delete a specific card by your ID")
     @DeleteMapping("/{id}")
-    @Operation(summary = "Exclui uma card pelo id")
-    public ResponseEntity<Void> excluir(@PathVariable Integer id){
-        if(!service.existById(id)){
-            return ResponseEntity.notFound().build();
-        }
-        service.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+        service.delete(id);
+        return ResponseEntity.ok().build();
     }
+
+
 }
