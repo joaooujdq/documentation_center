@@ -137,3 +137,34 @@
     width: 60px;
     height: 30px;
 }
+
+/* Barra de pesquisa */
+#sidebar #searchBar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0;
+    width: 20vw;
+}
+#sidebar #searchBar #searchIcon {
+    display: none;
+}
+#sidebar #searchBar #searchInput {
+    width: 100%;
+    height: 36px;
+    border-radius: 8px;
+    border: 2px solid #C4C4C4;
+    padding: 0 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+#sidebar #searchBar #categoriaSelect {
+    width: 100%;
+    height: 36px;
+    border-radius: 8px;
+    border: 2px solid #C4C4C4;
+    padding: 0 8px;
+    font-size: 14px;
+    background-color: #fff;
+    box-sizing: border-box;
+}
