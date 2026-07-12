@@ -1,0 +1,93 @@
+#assinaturas-body {
+    padding: 24px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+#assinar-form {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.assinar-bloco {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: #f5f5f5;
+    padding: 16px;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+#input-assinar {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+#btn-assinar {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+#assinatura-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.assinatura-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+#assin-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#assin-data {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.btn-cancelar {
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    color: #c62828;
+    font-size: 13px;
+}
+
+#msg-feedback {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: #2e7d32;
+    margin-bottom: 16px;
+}
+
+#sem-assinatura, #sem-login {
+    color: #888;
+    text-align: center;
+    margin-top: 40px;
+}

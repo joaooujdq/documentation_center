@@ -25,9 +25,10 @@ const Header = () => {
     if(response != null){
         localStorage.setItem("login", nome);
         localStorage.setItem("admin", response.data.admin_user);
+        localStorage.setItem("userId", response.data.codigo_user);
         setLogado(nome)
     }
-    
+
 }
 
 useEffect(() => {
@@ -153,7 +154,10 @@ const permissionCard = async () => {
     <button onClick={permissionUser}>Manage Users</button>
     
     <button onClick={permissionCard}>Manage Cards</button>
- 
+
+    <button onClick={() => history.push('/notificacoes')}>🔔 Notificações</button>
+
+    <button onClick={() => history.push('/assinaturas')}>📌 Assinaturas</button>
 
     <Popup trigger={<button >  Change Account</button>} position="center center" open={isOpen}>
                                             <h4 id='popupText'>Entre com seu perfil: </h4>
