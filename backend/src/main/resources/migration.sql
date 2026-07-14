@@ -1,5 +1,5 @@
 -- ============================================================
--- Migração: adição das 3 melhorias do Lucas (TCC TJGO)
+-- Migração: novos campos e tabelas (resumo, tags, assinaturas, notificações)
 -- Compatível com Oracle (principal) e MySQL (dev)
 -- ============================================================
 
