@@ -1,20 +1,11 @@
 package com.example.documentation_center.dtos;
 
-import com.example.documentation_center.dtos.ValidationsGroups.CardId;
 import com.example.documentation_center.models.Card;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.RepresentationModel;
 import com.github.dozermapper.core.Mapping;
+import org.springframework.hateoas.RepresentationModel;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.groups.ConvertGroup;
-import jakarta.validation.groups.Default;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -31,7 +22,6 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
     private Long idUser;
     private String nome;
     private String descricao;
-    private String imageLink;
     private String thumbnail;
     private LocalDate dataHora;
 
@@ -47,26 +37,12 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
     @JsonProperty("categoria_card")
     private String categoria;
 
-    //@ConvertGroup(from = Default.class, to = ValidationsGroups.FolderId.class)
-    //@Valid
-    //private FolderDTO folderDTO;
-
-    //@ConvertGroup(from = Default.class, to = ValidationsGroups.BranchId.class)
-    //@Valid
-    //private BranchDTO branchDTO;
-
-    //@ConvertGroup(from = Default.class, to = ValidationsGroups.UserId.class)
-    //@Valid
-    //private UserDTO userDTO;
-
-    public CardDTO() {
-    }
+    public CardDTO() {}
 
     public CardDTO(Card obj) {
         key = obj.getId();
         nome = obj.getNome();
         descricao = obj.getDescricao();
-        imageLink = obj.getImageLink();
         thumbnail = obj.getThumbnail();
         dataHora = obj.getDataHora();
         resumo = obj.getResumo();
@@ -77,89 +53,29 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
         idUser = obj.getIdUser();
     }
 
-    public Long getKey() {
-        return key;
-    }
+    public Long getKey() { return key; }
+    public void setKey(Long key) { this.key = key; }
 
-    public void setKey(Long key) {
-        this.key = key;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getThumbnail() {
-        return thumbnail;
-    }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
 
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
+    public String getThumbnail() { return thumbnail; }
+    public void setThumbnail(String thumbnail) { this.thumbnail = thumbnail; }
 
-    public LocalDate getDataHora() {
-        return dataHora;
-    }
+    public LocalDate getDataHora() { return dataHora; }
+    public void setDataHora(LocalDate dataHora) { this.dataHora = dataHora; }
 
-    public void setDataHora(LocalDate dataHora) {
-        this.dataHora = dataHora;
-    }
+    public Long getIdFolder() { return idFolder; }
+    public void setIdFolder(Long idFolder) { this.idFolder = idFolder; }
 
-    public String getImageLink() {
-        return imageLink;
-    }
+    public Long getIdBranch() { return idBranch; }
+    public void setIdBranch(Long idBranch) { this.idBranch = idBranch; }
 
-    public void setImageLink(String imageLink) {
-        this.imageLink = imageLink;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public Long getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
-    }
-
-    public Long getIdBranch() {
-        return idBranch;
-    }
-
-    public void setIdBranch(Long idBranch) {
-        this.idBranch = idBranch;
-    }
-
-    public Long getIdFolder() {
-        return idFolder;
-    }
-
-    public void setIdFolder(Long idFolder) {
-        this.idFolder = idFolder;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof CardDTO cardDTO)) return false;
-        if (!super.equals(o)) return false;
-        return Objects.equals(getKey(), cardDTO.getKey()) && Objects.equals(getIdFolder(), cardDTO.getIdFolder()) && Objects.equals(getIdBranch(), cardDTO.getIdBranch()) && Objects.equals(getIdUser(), cardDTO.getIdUser()) && Objects.equals(getNome(), cardDTO.getNome()) && Objects.equals(getDescricao(), cardDTO.getDescricao()) && Objects.equals(getImageLink(), cardDTO.getImageLink()) && Objects.equals(getThumbnail(), cardDTO.getThumbnail()) && Objects.equals(getDataHora(), cardDTO.getDataHora());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), getKey(), getIdFolder(), getIdBranch(), getIdUser(), getNome(), getDescricao(), getImageLink(), getThumbnail(), getDataHora());
-    }
+    public Long getIdUser() { return idUser; }
+    public void setIdUser(Long idUser) { this.idUser = idUser; }
 
     public String getResumo() { return resumo; }
     public void setResumo(String resumo) { this.resumo = resumo; }
@@ -169,4 +85,20 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
 
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof CardDTO cardDTO)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(getKey(), cardDTO.getKey()) && Objects.equals(getIdFolder(), cardDTO.getIdFolder())
+                && Objects.equals(getIdBranch(), cardDTO.getIdBranch()) && Objects.equals(getIdUser(), cardDTO.getIdUser())
+                && Objects.equals(getNome(), cardDTO.getNome()) && Objects.equals(getDescricao(), cardDTO.getDescricao())
+                && Objects.equals(getThumbnail(), cardDTO.getThumbnail()) && Objects.equals(getDataHora(), cardDTO.getDataHora());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getKey(), getIdFolder(), getIdBranch(), getIdUser(),
+                getNome(), getDescricao(), getThumbnail(), getDataHora());
+    }
 }

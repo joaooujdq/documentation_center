@@ -1,12 +1,8 @@
 package com.example.documentation_center.models;
 
 import jakarta.persistence.*;
-
-//import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -22,11 +18,9 @@ public class Card implements Serializable {
     @Column(name = "nome", nullable = false)
     private String nome;
 
+    @Lob
     @Column(name = "descricao")
     private String descricao;
-
-    @Column(name = "imageLink")
-    private String imageLink;
 
     @Column(name = "thumbnail")
     private String thumbnail;
@@ -43,9 +37,6 @@ public class Card implements Serializable {
     @Column(name = "categoria", length = 100)
     private String categoria;
 
-    //@ManyToOne
-    //private Folder folderObj;
-
     @Column(name = "id_folder", nullable = false, length = 10)
     private Long idFolder;
 
@@ -55,19 +46,12 @@ public class Card implements Serializable {
     @Column(name = "id_user", nullable = false, length = 10)
     private Long idUser;
 
-    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "cardObj", orphanRemoval = true)
-    //private List<Folder> folders = new ArrayList<>();
+    public Card() {}
 
-    public Card(){
-
-    }
-
-
-    public Card(Long id, String nome, String descricao, String imageLink, String thumbnail, Long idFolder, Long idBranch, Long idUser) {
+    public Card(Long id, String nome, String descricao, String thumbnail, Long idFolder, Long idBranch, Long idUser) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
-        this.imageLink = imageLink;
         this.thumbnail = thumbnail;
         this.dataHora = LocalDate.now();
         this.idFolder = idFolder;
@@ -75,111 +59,50 @@ public class Card implements Serializable {
         this.idUser = idUser;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public String getThumbnail() { return thumbnail; }
+    public void setThumbnail(String thumbnail) { this.thumbnail = thumbnail; }
 
-    public String getDescricao() {
-        return descricao;
-    }
+    public LocalDate getDataHora() { return dataHora; }
+    public void setDataHora(LocalDate dataHora) { this.dataHora = dataHora; }
 
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
+    public Long getIdFolder() { return idFolder; }
+    public void setIdFolder(Long idFolder) { this.idFolder = idFolder; }
 
-    public String getImageLink() {
-        return imageLink;
-    }
+    public Long getIdBranch() { return idBranch; }
+    public void setIdBranch(Long idBranch) { this.idBranch = idBranch; }
 
-    public void setImageLink(String imageLink) {
-        this.imageLink = imageLink;
-    }
+    public Long getIdUser() { return idUser; }
+    public void setIdUser(Long idUser) { this.idUser = idUser; }
 
-    public String getThumbnail() {
-        return thumbnail;
-    }
+    public String getResumo() { return resumo; }
+    public void setResumo(String resumo) { this.resumo = resumo; }
 
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
-    }
+    public String getTags() { return tags; }
+    public void setTags(String tags) { this.tags = tags; }
 
-    public LocalDate getDataHora() {
-        return dataHora;
-    }
-
-    public void setDataHora(LocalDate dataHora) {
-        this.dataHora = dataHora;
-    }
-
-    public Long getIdFolder() {
-        return idFolder;
-    }
-
-    public void setIdFolder(Long idFolder) {
-        this.idFolder = idFolder;
-    }
-
-    public Long getIdBranch() {
-        return idBranch;
-    }
-
-    public void setIdBranch(Long idBranch) {
-        this.idBranch = idBranch;
-    }
-
-    public Long getIdUser() {
-        return idUser;
-    }
-
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
-    }
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Card card)) return false;
-        return Objects.equals(getId(), card.getId()) && Objects.equals(getNome(), card.getNome()) && Objects.equals(getDescricao(), card.getDescricao()) && Objects.equals(getImageLink(), card.getImageLink()) && Objects.equals(getThumbnail(), card.getThumbnail()) && Objects.equals(getDataHora(), card.getDataHora()) && Objects.equals(getIdFolder(), card.getIdFolder()) && Objects.equals(getIdBranch(), card.getIdBranch()) && Objects.equals(getIdUser(), card.getIdUser());
+        return Objects.equals(getId(), card.getId()) && Objects.equals(getNome(), card.getNome())
+                && Objects.equals(getDescricao(), card.getDescricao()) && Objects.equals(getThumbnail(), card.getThumbnail())
+                && Objects.equals(getDataHora(), card.getDataHora()) && Objects.equals(getIdFolder(), card.getIdFolder())
+                && Objects.equals(getIdBranch(), card.getIdBranch()) && Objects.equals(getIdUser(), card.getIdUser());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getNome(), getDescricao(), getImageLink(), getThumbnail(), getDataHora(), getIdFolder(), getIdBranch(), getIdUser());
-    }
-
-    public String getResumo() {
-        return resumo;
-    }
-
-    public void setResumo(String resumo) {
-        this.resumo = resumo;
-    }
-
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
-    public String getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
+        return Objects.hash(getId(), getNome(), getDescricao(), getThumbnail(), getDataHora(), getIdFolder(), getIdBranch(), getIdUser());
     }
 }
-

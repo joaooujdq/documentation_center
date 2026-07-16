@@ -35,7 +35,36 @@ CREATE TABLE Assinaturas (
 -- );
 
 
--- 3. Tabela de Notificações
+-- 3. Tabela de Imagens (BLOB para upload inline no editor)
+-- Oracle:
+CREATE TABLE Imagens (
+    id    NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    dados BLOB NOT NULL,
+    tipo  VARCHAR2(100) NOT NULL,
+    nome  VARCHAR2(255)
+);
+-- MySQL:
+-- CREATE TABLE Imagens (
+--     id    BIGINT AUTO_INCREMENT PRIMARY KEY,
+--     dados LONGBLOB NOT NULL,
+--     tipo  VARCHAR(100) NOT NULL,
+--     nome  VARCHAR(255)
+-- );
+
+-- 4. Remover campo imageLink da tabela Cards
+-- Oracle:
+ALTER TABLE Cards DROP COLUMN imageLink;
+-- MySQL:
+-- ALTER TABLE Cards DROP COLUMN imageLink;
+
+-- 5. Ampliar descricao para CLOB (suporte a HTML rico)
+-- Oracle:
+ALTER TABLE Cards MODIFY descricao CLOB;
+-- MySQL:
+-- ALTER TABLE Cards MODIFY COLUMN descricao LONGTEXT;
+
+
+-- 6. Tabela de Notificações
 -- Oracle:
 CREATE TABLE Notificacoes (
     codigo           NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
