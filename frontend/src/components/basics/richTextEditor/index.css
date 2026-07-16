@@ -1,0 +1,64 @@
+.rte-wrapper {
+    border: 1px solid #C4C4C4;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.rte-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #C4C4C4;
+    background: #f8f9fa;
+}
+
+.rte-toolbar button {
+    padding: 4px 8px;
+    border: 1px solid #C4C4C4;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    transition: background 0.15s;
+}
+
+.rte-toolbar button:hover {
+    background: #e9ecef;
+}
+
+.rte-toolbar button.active {
+    background: #495057;
+    color: #fff;
+    border-color: #495057;
+}
+
+.rte-divider {
+    width: 1px;
+    background: #C4C4C4;
+    margin: 2px 4px;
+    align-self: stretch;
+}
+
+.rte-content {
+    padding: 12px 14px;
+    min-height: 180px;
+    font-size: 14px;
+    line-height: 1.6;
+    outline: none;
+}
+
+.rte-content .ProseMirror {
+    outline: none;
+    min-height: 160px;
+}
+
+.rte-content .ProseMirror p { margin: 0 0 8px; }
+.rte-content .ProseMirror h2 { font-size: 1.3em; margin: 12px 0 6px; }
+.rte-content .ProseMirror h3 { font-size: 1.1em; margin: 10px 0 4px; }
+.rte-content .ProseMirror code { background: #f1f3f5; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+.rte-content .ProseMirror pre  { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 6px; overflow-x: auto; }
+.rte-content .ProseMirror ul, .rte-content .ProseMirror ol { padding-left: 20px; }
+.rte-content .ProseMirror img { max-width: 100%; border-radius: 4px; margin: 6px 0; }
