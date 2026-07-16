@@ -36,7 +36,6 @@ interface icard {
     codigo_card: number,
     nome_card: string,
     descricao_card: string,
-    imageLink_card: string,
     thumbnail_card: string,
     data_card: string,
     resumo_card: string,
@@ -64,7 +63,6 @@ const CardBody: React.FC = () => {
     const [categoria, setCategoria] = useState('');
     const [codigo, setCodigo] = useState('');
     const [nome, setNome] = useState('');
-    const [imageLink, setImageLink] = useState('');
     const [thumbnailLink, setThumbnailLink] = useState('');
     const [data, setData] = useState('');
     const [folderId, setFolderId] = useState('');
@@ -134,7 +132,6 @@ const CardBody: React.FC = () => {
         setCodigo(d.codigo_card);
         setNome(d.nome_card);
         setDescricao2(d.descricao_card);
-        setImageLink(d.imageLink_card);
         setThumbnailLink(d.thumbnail_card);
         setData(d.data_card);
         setResumo(d.resumo_card ?? '');
@@ -200,7 +197,7 @@ const CardBody: React.FC = () => {
                         <button id='buttons' key={m.codigo_card}>
                             <button id='text' onClick={() => ExibirMsg(m.codigo_card.toString())}>
                                 <h6>{m.nome_card}</h6>
-                                <h4>{m.descricao_card}</h4>
+                                {m.resumo_card && <h4>{m.resumo_card}</h4>}
                             </button>
                             <div id='iconsButtons'>
                                 {isAdmin && <FiEdit id='editButton' onClick={updateMsg} />}
@@ -226,12 +223,13 @@ const CardBody: React.FC = () => {
                                 <li>
                                     <h1>Id do Card: {codigo}</h1>
                                     <h1>Nome: {nome}</h1>
-                                    <h1>Descrição: {descricao2}</h1>
                                     {resumo && <h1>Resumo: {resumo}</h1>}
                                     {categoriaCard && <h1>Categoria: {categoriaCard}</h1>}
                                     {tags && <h1>Tags: {tags}</h1>}
-                                    <h1>Imagem Link: {imageLink}</h1>
                                     <h1>Thumbnail Link: {thumbnailLink}</h1>
+                                    {descricao2 && (
+                                        <div id='descricao-html' dangerouslySetInnerHTML={{ __html: descricao2 }} />
+                                    )}
                                     <h1>Data: {data}</h1>
                                     <h1>Folder Id: {folderId}</h1>
                                     <h1>Folder Nome: {folderNome}</h1>

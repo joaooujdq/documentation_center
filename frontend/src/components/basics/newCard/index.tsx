@@ -4,106 +4,70 @@ import './index.css'
 import React from 'react';
 import Alert from 'react-popup-alert'
 import 'reactjs-popup/dist/index.css';
+import RichTextEditor from '../richTextEditor';
 
-interface iuser {
-    codigo_user: number,
-    nome_user: string,
-    senha_user: string,
-    admin_user: boolean,
-    data_user: string,
-    _links_user: i_links
-}
-interface ibranch {
-    codigo_branch: number,
-    nome_branch: string,
-    descricao_branch: string,
-    data_branch: string,
-    userDTO: iuser,
-    _links_branch: i_links
-}
 interface ifolder {
     codigo_folder: number,
     nome_folder: string,
     descricao_folder: string,
     data_folder: string,
-    branchDTO: ibranch,
-    _links_folder: i_links
 }
-interface i_links {
-    self: iself
-}
-interface iself {
-    href: string
-}
+interface i_links { self: { href: string } }
 
 const HomeBody: React.FC = () => {
     const [inputNome, setInputNome] = useState('');
-    const [inputDescricao2, setInputDescricao2] = useState('');
-    const [inputImageLink, setInputImageLink] = useState('');
+    const [inputDescricao, setInputDescricao] = useState('');
     const [inputThumbnail, setInputThumbnail] = useState('');
     const [folderId, setFolderId] = useState<ifolder[]>([]);
     const [inputFolderId, setInputFolderId] = useState('');
     const [post, setPost] = useState(false);
     const [descricao, setDescricao] = useState("");
 
-    // IA: resumo
     const [resumo, setResumo] = useState('');
     const [loadingResumo, setLoadingResumo] = useState(false);
-
-    // IA: tags e categoria
     const [tags, setTags] = useState<string[]>([]);
     const [categoria, setCategoria] = useState('');
     const [loadingTags, setLoadingTags] = useState(false);
 
     const gerarResumo = async () => {
-        if (!inputNome && !inputDescricao2) return;
+        if (!inputNome && !inputDescricao) return;
         setLoadingResumo(true);
         try {
-            const response = await api.post('/v1/ts/ia/resumo', {
-                titulo: inputNome,
-                conteudo: inputDescricao2
-            });
+            const response = await api.post('/v1/ts/ia/resumo', { titulo: inputNome, conteudo: inputDescricao });
             setResumo(response.data.resumo || '');
         } catch {
-            setResumo('Não foi possível gerar o resumo. Verifique se o Ollama está ativo.');
+            setResumo('Não foi possível gerar o resumo.');
         } finally {
             setLoadingResumo(false);
         }
     };
 
     const sugerirTags = async () => {
-        if (!inputNome && !inputDescricao2) return;
+        if (!inputNome && !inputDescricao) return;
         setLoadingTags(true);
         try {
-            const response = await api.post('/v1/ts/ia/sugestoes', {
-                titulo: inputNome,
-                conteudo: inputDescricao2
-            });
+            const response = await api.post('/v1/ts/ia/sugestoes', { titulo: inputNome, conteudo: inputDescricao });
             const json = JSON.parse(response.data);
             setTags(json.tags || []);
             setCategoria(json.categoria || '');
         } catch {
-            setTags([]);
-            setCategoria('');
+            setTags([]); setCategoria('');
         } finally {
             setLoadingTags(false);
         }
     };
 
-    const removerTag = (tag: string) => {
-        setTags(tags.filter(t => t !== tag));
-    };
+    const removerTag = (tag: string) => setTags(tags.filter(t => t !== tag));
 
     const postMsg = async () => {
         if (folderId == null) {
-            setDescricao("Não existe Branch com esse ID")
-            setPost(!post)
+            setDescricao("Não existe Branch com esse ID");
+            setPost(!post);
         } else {
             let flag2 = false;
-            const response = await api.post('/v1/ts/cards/', {
+            await api.post('/v1/ts/cards/', {
                 "nome_card": inputNome,
-                "descricao_card": inputDescricao2,
-                "imageLink_card": inputImageLink,
+                "descricao_card": inputDescricao,
                 "thumbnail_card": inputThumbnail,
                 "resumo_card": resumo || null,
                 "tags_card": tags.length > 0 ? tags.join(',') : null,
@@ -112,57 +76,42 @@ const HomeBody: React.FC = () => {
             }).then(response => response.data)
                 .catch(async error => {
                     if (error.response) {
-                        await setDescricao(error.response.data.descricao)
+                        await setDescricao(error.response.data.descricao);
                         flag2 = true;
-                        setPost(!post)
+                        setPost(!post);
                     }
                 });
-            if (!flag2) {
-                window.location.reload();
-            }
+            if (!flag2) window.location.reload();
         }
-    }
+    };
 
     useEffect(() => {
-        if (post) {
-            onShowAlert('error')
-        }
-    }, [post])
+        if (post) onShowAlert('error');
+    }, [post]);
 
-    const [alert, setAlert] = React.useState({
-        type: 'error',
-        text: descricao,
-        show: false
-    })
+    const [alert, setAlert] = React.useState({ type: 'error', text: descricao, show: false });
 
     function onCloseAlert() {
-        setAlert({ type: '', text: '', show: false })
-        setPost(!post)
+        setAlert({ type: '', text: '', show: false });
+        setPost(!post);
     }
-
     function onShowAlert(type: string) {
-        setAlert({ type: type, text: descricao, show: true })
+        setAlert({ type, text: descricao, show: true });
     }
 
     useEffect(() => {
         const findFolderById = async () => {
-            const response = await api.get('/v1/ts/folders/' + inputFolderId)
-            setFolderId(response.data)
-        }
-        findFolderById()
-    }, [inputFolderId])
+            const response = await api.get('/v1/ts/folders/' + inputFolderId);
+            setFolderId(response.data);
+        };
+        if (inputFolderId) findFolderById();
+    }, [inputFolderId]);
 
     return (
         <>
             <Alert
-                header={''}
-                btnText={'Fechar'}
-                text={alert.text}
-                type={alert.type}
-                show={alert.show}
-                onClosePress={onCloseAlert}
-                pressCloseOnOutsideClick={true}
-                showBorderBottom={true}
+                header={''} btnText={'Fechar'} text={alert.text} type={alert.type} show={alert.show}
+                onClosePress={onCloseAlert} pressCloseOnOutsideClick={true} showBorderBottom={true}
                 alertStyles={{
                     "background-color": "#f8f9fa", "width": "300px", "height": "100px",
                     "display": "flex", "flex-direction": "column", "align-items": "center",
@@ -183,56 +132,40 @@ const HomeBody: React.FC = () => {
                     <div id='CardForm'>
                         <div id='divH1'>
                             <h1>Nome*: </h1>
-                            <h1>Descrição: </h1>
-                            <h1>Image Link: </h1>
                             <h1>Thumbnail: </h1>
                             <h1>ID do Folder*: </h1>
                         </div>
                         <div id='divInput'>
                             <input id='input' type="text" value={inputNome} onChange={e => setInputNome(e.target.value)} required />
-                            <input id='input' type="text" value={inputDescricao2} onChange={e => setInputDescricao2(e.target.value)} required />
-                            <input id='input' type="text" value={inputImageLink} onChange={e => setInputImageLink(e.target.value)} required />
-                            <input id='input' type="text" value={inputThumbnail} onChange={e => setInputThumbnail(e.target.value)} required />
+                            <input id='input' type="text" value={inputThumbnail} onChange={e => setInputThumbnail(e.target.value)} />
                             <input id='input' type="text" value={inputFolderId} onChange={e => setInputFolderId(e.target.value)} required />
                         </div>
                     </div>
 
-                    {/* IA: Resumo automático */}
+                    <div id='editor-section'>
+                        <h3>Conteúdo:</h3>
+                        <RichTextEditor content={inputDescricao} onChange={setInputDescricao} />
+                    </div>
+
                     <div id='ia-section'>
                         <h3>Resumo automático (TL;DR)</h3>
-                        <button
-                            type="button"
-                            onClick={gerarResumo}
-                            disabled={loadingResumo || (!inputNome && !inputDescricao2)}
-                            id='btn-ia'
-                        >
+                        <button type="button" onClick={gerarResumo}
+                            disabled={loadingResumo || (!inputNome && !inputDescricao)} id='btn-ia'>
                             {loadingResumo ? 'Gerando...' : '✨ Gerar Resumo via IA'}
                         </button>
                         {resumo !== '' && (
                             <div id='ia-resumo'>
                                 <label>Resumo (editável antes de salvar):</label>
-                                <textarea
-                                    value={resumo}
-                                    onChange={e => setResumo(e.target.value)}
-                                    rows={3}
-                                    id='textarea-resumo'
-                                />
-                                <button type="button" id='btn-descartar' onClick={() => setResumo('')}>
-                                    Descartar resumo
-                                </button>
+                                <textarea value={resumo} onChange={e => setResumo(e.target.value)} rows={3} id='textarea-resumo' />
+                                <button type="button" id='btn-descartar' onClick={() => setResumo('')}>Descartar resumo</button>
                             </div>
                         )}
                     </div>
 
-                    {/* IA: Tags e Categoria */}
                     <div id='ia-section'>
                         <h3>Tags e Categoria (IA)</h3>
-                        <button
-                            type="button"
-                            onClick={sugerirTags}
-                            disabled={loadingTags || (!inputNome && !inputDescricao2)}
-                            id='btn-ia'
-                        >
+                        <button type="button" onClick={sugerirTags}
+                            disabled={loadingTags || (!inputNome && !inputDescricao)} id='btn-ia'>
                             {loadingTags ? 'Analisando...' : '🏷️ Sugerir Tags via IA'}
                         </button>
                         {(tags.length > 0 || categoria) && (
@@ -240,12 +173,7 @@ const HomeBody: React.FC = () => {
                                 {categoria && (
                                     <div id='categoria-box'>
                                         <label>Categoria: </label>
-                                        <input
-                                            type="text"
-                                            value={categoria}
-                                            onChange={e => setCategoria(e.target.value)}
-                                            id='input-categoria'
-                                        />
+                                        <input type="text" value={categoria} onChange={e => setCategoria(e.target.value)} id='input-categoria' />
                                     </div>
                                 )}
                                 {tags.length > 0 && (
@@ -253,12 +181,7 @@ const HomeBody: React.FC = () => {
                                         <label>Tags (clique para remover):</label>
                                         <div id='chips-container'>
                                             {tags.map(tag => (
-                                                <span
-                                                    key={tag}
-                                                    className='tag-chip'
-                                                    onClick={() => removerTag(tag)}
-                                                    title='Clique para remover'
-                                                >
+                                                <span key={tag} className='tag-chip' onClick={() => removerTag(tag)} title='Clique para remover'>
                                                     {tag} ✕
                                                 </span>
                                             ))}
@@ -274,5 +197,6 @@ const HomeBody: React.FC = () => {
             </body>
         </>
     );
-}
+};
+
 export default HomeBody;
