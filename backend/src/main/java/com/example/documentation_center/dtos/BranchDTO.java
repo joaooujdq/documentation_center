@@ -28,11 +28,14 @@ public class BranchDTO extends RepresentationModel<BranchDTO>  implements Serial
     private static final long serialVersionUID = 1L;
 
     @Mapping("id")
-    @JsonProperty("id")
+    @JsonProperty("codigo_branch")
     private Long key;
     private Long idUser;
+    @JsonProperty("nome_branch")
     private String nome;
+    @JsonProperty("descricao_branch")
     private String descricao;
+    @JsonProperty("data_branch")
     private LocalDate dataHora;
 
     //@ConvertGroup(from = Default.class, to = ValidationsGroups.UserId.class)

@@ -23,13 +23,16 @@ public class FolderDTO extends RepresentationModel<FolderDTO> implements Seriali
     private static final long serialVersionUID = 1L;
 
     @Mapping("id")
-    @JsonProperty("id")
+    @JsonProperty("codigo_folder")
     //private Integer codigo;
     private Long key;
     private Long idBranch;
     private Long idUser;
+    @JsonProperty("nome_folder")
     private String nome;
+    @JsonProperty("descricao_folder")
     private String descricao;
+    @JsonProperty("data_folder")
     private LocalDate dataHora;
 
     //@ConvertGroup(from = Default.class, to = ValidationsGroups.BranchId.class)

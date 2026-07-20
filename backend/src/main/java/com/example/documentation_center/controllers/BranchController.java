@@ -22,7 +22,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Tag(name = "BranchEndpoint")
 @RestController
-@RequestMapping("/api/branch/v1")
+@RequestMapping("/v1/ts/branchs")
 public class BranchController {
 
     @Autowired
@@ -99,9 +99,10 @@ public class BranchController {
     }
 
     @Operation(summary = "Update a specific branch")
-    @PutMapping(produces = {"application/json", "application/xml", "application/x-yaml"},
+    @PutMapping(value = "/{id}", produces = {"application/json", "application/xml", "application/x-yaml"},
             consumes = {"application/json", "application/xml", "application/x-yaml"})
-    public BranchDTO update(@RequestBody BranchDTO branch) {
+    public BranchDTO update(@PathVariable Long id, @RequestBody BranchDTO branch) {
+        branch.setKey(id);
         BranchDTO branchDTO = service.update(branch);
         branchDTO.add(linkTo(methodOn(BranchController.class).findById(branchDTO.getKey())).withSelfRel());
         return branchDTO;

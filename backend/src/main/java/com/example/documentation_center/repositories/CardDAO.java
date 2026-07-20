@@ -22,13 +22,7 @@ public interface CardDAO extends JpaRepository<Card, Long> {
 
     @Query("SELECT p FROM Card p WHERE p.descricao LIKE LOWER(CONCAT ('%',:descricao,'%'))")
     Page<Card> findCardByNome(@Param("descricao") String descricao, Pageable pageable);
-    /*
-
-    CODIGO LUCAS
-
     Page<Card> findByNomeContainsIgnoreCase(String searchTerm, Pageable pageable);
     Page<Card> findByNomeContainsIgnoreCaseAndCategoriaIgnoreCase(String nome, String categoria, Pageable pageable);
     Page<Card> findByCategoriaIgnoreCase(String categoria, Pageable pageable);
-    Page<Card> findByNomeContains(String searchTerm, Pageable pageable);
-    */
 }
