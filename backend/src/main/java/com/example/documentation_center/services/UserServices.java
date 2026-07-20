@@ -101,6 +101,14 @@ public class UserServices implements UserDetailsService {
         return DozerConverter.parseObject(entity, UserDTO.class);
     }
 
+    public UserDTO findByNomeAndSenha(String nome, String senha) {
+        var entity = userDAO.findByNomeAndSenha(nome, senha);
+        if (entity != null) {
+            return DozerConverter.parseObject(entity, UserDTO.class);
+        }
+        throw new ResourceNotFoundException("Usuário não encontrado ou senha incorreta");
+    }
+
     public void delete(Long id) {
         User entity = userDAO.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
