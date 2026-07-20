@@ -23,7 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Tag(name = "UserEndpoint")
 @RestController
-@RequestMapping("/api/user/v1")
+@RequestMapping("/v1/ts/users")
 public class UserController {
 
     @Autowired
@@ -96,12 +96,21 @@ public class UserController {
     }
 
     @Operation(summary = "Update a specific person")
-    @PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+    @PutMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" },
             consumes = { "application/json", "application/xml", "application/x-yaml" })
-    public UserDTO update(@RequestBody UserDTO user) {
+    public UserDTO update(@PathVariable Long id, @RequestBody UserDTO user) {
+        user.setKey(id);
         UserDTO userDTO = service.update(user);
         userDTO.add(linkTo(methodOn(UserController.class).findById(userDTO.getKey())).withSelfRel());
         return userDTO;
+    }
+
+    @Operation(summary = "Find user by name and password (login)")
+    @GetMapping("/nomes")
+    public ResponseEntity<UserDTO> findByNomeAndSenha(
+            @RequestParam("nomes") String nome,
+            @RequestParam("senhas") String senha) {
+        return ResponseEntity.ok(service.findByNomeAndSenha(nome, senha));
     }
 
 

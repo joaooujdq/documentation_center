@@ -22,7 +22,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Tag(name = "CardEndpoint")
 @RestController
-@RequestMapping("/api/card/v1")
+@RequestMapping("/v1/ts/cards")
 public class CardController {
 
     @Autowired
@@ -99,12 +99,27 @@ public class CardController {
     }
 
     @Operation(summary = "Update a specific card")
-    @PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+    @PutMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" },
             consumes = { "application/json", "application/xml", "application/x-yaml" })
-    public CardDTO update(@RequestBody CardDTO card) {
-        CardDTO cardDTO = service.update(card);
+    public CardDTO update(@PathVariable Long id, @RequestBody CardDTO card) {
+        CardDTO cardDTO = service.update(id, card);
         cardDTO.add(linkTo(methodOn(CardController.class).findById(cardDTO.getKey())).withSelfRel());
         return cardDTO;
+    }
+
+    @Operation(summary = "Search cards by name and/or category")
+    @GetMapping(value = "/pesquisa", produces = { "application/json", "application/xml", "application/x-yaml" })
+    public ResponseEntity<CollectionModel<CardDTO>> pesquisar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "limit", defaultValue = "12") int limit,
+            @RequestParam(value = "direction", defaultValue = "asc") String direction) {
+        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
+        Page<CardDTO> cards = service.pesquisar(nome, categoria, pageable);
+        cards.stream().forEach(p -> p.add(linkTo(methodOn(CardController.class).findById(p.getKey())).withSelfRel()));
+        return ResponseEntity.ok(CollectionModel.of(cards));
     }
 
 
