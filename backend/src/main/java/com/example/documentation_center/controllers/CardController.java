@@ -56,32 +56,7 @@ public class CardController {
     }
 
 
-    @Operation(summary = "Find card by name" )
-    @GetMapping(value = "/findCardByName/{description}", produces = { "application/json", "application/xml", "application/x-yaml" })
-    public ResponseEntity<CollectionModel<CardDTO>> findPersonByName(
-            @PathVariable("description") String description,
-            @RequestParam(value="page", defaultValue = "0") int page,
-            @RequestParam(value="limit", defaultValue = "12") int limit,
-            @RequestParam(value="direction", defaultValue = "asc") String direction) {
-
-        var sortDirection = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
-
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sortDirection, "id"));
-
-        Page<CardDTO> card =  service.findCardByName(description, pageable);
-        card
-                .stream()
-                .forEach(p -> p.add(
-                                linkTo(methodOn(CardController.class).findById(p.getKey())).withSelfRel()
-                        )
-                );
-
-        //PagedResources<?> resources = assembler.toResource(card);
-
-        return ResponseEntity.ok(CollectionModel.of(card));
-    }
-
-    @Operation(summary = "Find a specific card by your ID" )
+@Operation(summary = "Find a specific card by your ID" )
     @GetMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" })
     public CardDTO findById(@PathVariable("id") Long id) {
         CardDTO cardDTO = service.findById(id);

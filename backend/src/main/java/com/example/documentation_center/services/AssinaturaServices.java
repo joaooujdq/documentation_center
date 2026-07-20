@@ -34,8 +34,8 @@ public class AssinaturaServices {
         if (assinaturaDAO.existsByUserAndBranch(userId, branchId)) {
             throw new BusinessException("Usuário já assina esse time.");
         }
-        User user = userDAO.findById(userId).orElseThrow(() -> new BusinessException("Usuário não encontrado."));
-        Branch branch = branchDAO.findById(branchId).orElseThrow(() -> new BusinessException("Time não encontrado."));
+        User user = userDAO.findById(userId.longValue()).orElseThrow(() -> new BusinessException("Usuário não encontrado."));
+        Branch branch = branchDAO.findById(branchId.longValue()).orElseThrow(() -> new BusinessException("Time não encontrado."));
         return assinaturaDAO.save(new Assinatura(user, branch, null));
     }
 
@@ -44,8 +44,8 @@ public class AssinaturaServices {
         if (assinaturaDAO.existsByUserAndFolder(userId, folderId)) {
             throw new BusinessException("Usuário já assina esse sistema.");
         }
-        User user = userDAO.findById(userId).orElseThrow(() -> new BusinessException("Usuário não encontrado."));
-        Folder folder = folderDAO.findById(folderId).orElseThrow(() -> new BusinessException("Sistema não encontrado."));
+        User user = userDAO.findById(userId.longValue()).orElseThrow(() -> new BusinessException("Usuário não encontrado."));
+        Folder folder = folderDAO.findById(folderId.longValue()).orElseThrow(() -> new BusinessException("Sistema não encontrado."));
         return assinaturaDAO.save(new Assinatura(user, null, folder));
     }
 

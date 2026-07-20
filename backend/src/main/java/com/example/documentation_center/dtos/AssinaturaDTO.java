@@ -16,10 +16,10 @@ public class AssinaturaDTO {
         this.codigo = a.getCodigo();
         this.dataHora = a.getDataHora();
         if (a.getBranchObj() != null) {
-            this.branchObj = new BranchInfo(a.getBranchObj().getCodigo(), a.getBranchObj().getNome());
+            this.branchObj = new BranchInfo(a.getBranchObj().getId().intValue(), a.getBranchObj().getNome());
         }
         if (a.getFolderObj() != null) {
-            this.folderObj = new FolderInfo(a.getFolderObj().getCodigo(), a.getFolderObj().getNome());
+            this.folderObj = new FolderInfo(a.getFolderObj().getId().intValue(), a.getFolderObj().getNome());
         }
     }
 
