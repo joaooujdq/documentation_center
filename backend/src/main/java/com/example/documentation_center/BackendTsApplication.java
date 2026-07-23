@@ -57,11 +57,11 @@ public class BackendTsApplication implements CommandLineRunner {
 		Folder f4 = new Folder(4L,  2L, 4L, "nome4", "desc4");
 		Folder f5 = new Folder(5L,  5L, 4L, "nome5", "desc5");
 
-		Card c1 = new Card(1L,  "nome1","desc1" , "image1","thumb1" ,1L,1L,1L);
-		Card c2 = new Card(2L,  "nome2","desc2" , "image2","thumb2" ,2L,2L,2L);
-		Card c3 = new Card(3L,  "nome3", "desc3", "image3", "thumb3",3L,3L,3L);
-		Card c4 = new Card(4L,  "nome4","desc4" , "image4", "thumb4",4L,4L,4L);
-		Card c5 = new Card(5L,  "nome5", "desc5", "image5","thumb5" ,5L,5L,5L);
+		Card c1 = new Card(1L,  "nome1","desc1" , "thumb1" ,1L,1L,1L);
+		Card c2 = new Card(2L,  "nome2","desc2" ,"thumb2" ,2L,2L,2L);
+		Card c3 = new Card(3L,  "nome3", "desc3", "thumb3",3L,3L,3L);
+		Card c4 = new Card(4L,  "nome4","desc4" , "thumb4",4L,4L,4L);
+		Card c5 = new Card(5L,  "nome5", "desc5","thumb5" ,5L,5L,5L);
 
 		userDAO.saveAll(Arrays.asList(u1,u2,u3,u4,u5));
 		branchDAO.saveAll(Arrays.asList(b1,b2,b3,b4,b5));

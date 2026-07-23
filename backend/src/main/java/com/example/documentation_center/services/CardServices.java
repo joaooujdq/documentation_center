@@ -2,15 +2,11 @@ package com.example.documentation_center.services;
 
 import com.example.documentation_center.converter.DozerConverter;
 import com.example.documentation_center.dtos.CardDTO;
+import com.example.documentation_center.dtos.ScoreDTO;
+import com.example.documentation_center.dtos.UserDTO;
 import com.example.documentation_center.exception.ResourceNotFoundException;
-import com.example.documentation_center.models.Branch;
-import com.example.documentation_center.models.Card;
-import com.example.documentation_center.models.Folder;
-import com.example.documentation_center.models.User;
-import com.example.documentation_center.repositories.BranchDAO;
-import com.example.documentation_center.repositories.CardDAO;
-import com.example.documentation_center.repositories.FolderDAO;
-import com.example.documentation_center.repositories.UserDAO;
+import com.example.documentation_center.models.*;
+import com.example.documentation_center.repositories.*;
 import com.example.documentation_center.services.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -26,8 +23,33 @@ public class CardServices {
     @Autowired
     CardDAO cardDAO;
 
+    @Autowired
+    ScoreDAO scoreDAO;
+
+    @Autowired
+    UserDAO userDAO;
+
+    @Autowired
+    private ScoreServices service;
+
     public CardDTO create(CardDTO cardDTO) {
         var entity = DozerConverter.parseObject(cardDTO, Card.class);
+        /*
+        //verifica se o user ja existe dentro da tabela score
+        if(scoreDAO.findScoreByNome(cardDTO.getNome()) == null){
+            UserDTO userDTO = userDAO.findById(cardDTO.getIdUser());
+            if(userDTO != null){
+                //se o user ja esta na tabela de Score, consulta pontuação anterior e acrescenta
+                Integer pontosAntes = service.findByScoreByNome(userDTO.getNome());
+                ScoreDTO scoreDTO = service.update(new Score(userDTO.getNome(),userDTO.getDescricao(),pontosAntes + 1, LocalDate.now()));
+            }
+
+        }else{
+            UserDTO userDTO = userDAO.findById(cardDTO.getIdUser());
+            ScoreDTO scoreDTO = new ScoreDTO(userDTO.getNome(),userDTO.getDescricao(), 1, LocalDate.now());
+            service.create(scoreDTO);
+        }
+        */
         return DozerConverter.parseObject(cardDAO.save(entity), CardDTO.class);
     }
 
@@ -71,7 +93,7 @@ public class CardServices {
         entity.setNome(card.getNome());
         entity.setDescricao(card.getDescricao());
         entity.setThumbnail(card.getThumbnail());
-        entity.setImageLink(card.getImageLink());
+        //entity.setImageLink(card.getImageLink());
         entity.setDataHora(card.getDataHora());
 
         return DozerConverter.parseObject(cardDAO.save(entity), CardDTO.class);
