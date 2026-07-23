@@ -27,6 +27,9 @@ public interface UserDAO extends JpaRepository<User, Long>{
     @Query("SELECT u FROM User u WHERE u.nome =:nome")
     User findUserByNome(@Param("nome") String nome);
 
+    @Query("SELECT u FROM User u WHERE u.nome = :nome AND u.senha = :senha")
+    User findByNomeAndSenha(@Param("nome") String nome, @Param("senha") String senha);
+
     @Modifying
     @Query("UPDATE User p SET p.enabled = false WHERE p.id =:id")
     void disablePerson(@Param("id") Long id);

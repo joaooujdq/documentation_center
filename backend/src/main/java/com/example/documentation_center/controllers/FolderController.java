@@ -22,7 +22,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Tag(name = "FolderEndpoint")
 @RestController
-@RequestMapping("/api/folder/v1")
+@RequestMapping("/v1/ts/folders")
 public class FolderController {
 
     @Autowired
@@ -99,9 +99,10 @@ public class FolderController {
     }
 
     @Operation(summary = "Update a specific folder")
-    @PutMapping(produces = { "application/json", "application/xml", "application/x-yaml" },
+    @PutMapping(value = "/{id}", produces = { "application/json", "application/xml", "application/x-yaml" },
             consumes = { "application/json", "application/xml", "application/x-yaml" })
-    public FolderDTO update(@RequestBody FolderDTO folder) {
+    public FolderDTO update(@PathVariable Long id, @RequestBody FolderDTO folder) {
+        folder.setKey(id);
         FolderDTO folderDTO = service.update(folder);
         folderDTO.add(linkTo(methodOn(FolderController.class).findById(folderDTO.getKey())).withSelfRel());
         return folderDTO;

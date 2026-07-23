@@ -20,12 +20,17 @@ public class UserDTO extends RepresentationModel<UserDTO> implements Serializabl
     private static final long serialVersionUID = 1L;
 
     @Mapping("id")
-    @JsonProperty("id")
+    @JsonProperty("codigo_user")
     private Long key;
+    @JsonProperty("nome_user")
     private String nome;
+    @JsonProperty("descricao_user")
     private String descricao;
+    @JsonProperty("senha_user")
     private String senha;
+    @JsonProperty("admin_user")
     private Boolean admin;
+    @JsonProperty("data_user")
     private LocalDate dataHora;
 
 

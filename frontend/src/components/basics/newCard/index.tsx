@@ -12,22 +12,46 @@ interface ifolder {
     descricao_folder: string,
     data_folder: string,
 }
-interface i_links { self: { href: string } }
 
 const HomeBody: React.FC = () => {
     const [inputNome, setInputNome] = useState('');
     const [inputDescricao, setInputDescricao] = useState('');
-    const [inputThumbnail, setInputThumbnail] = useState('');
-    const [folderId, setFolderId] = useState<ifolder[]>([]);
-    const [inputFolderId, setInputFolderId] = useState('');
+    const [thumbnailUrl, setThumbnailUrl] = useState('');
+    const [thumbnailPreview, setThumbnailPreview] = useState('');
+    const [uploadingThumb, setUploadingThumb] = useState(false);
+    const [folders, setFolders] = useState<ifolder[]>([]);
+    const [selectedFolder, setSelectedFolder] = useState<ifolder | null>(null);
     const [post, setPost] = useState(false);
-    const [descricao, setDescricao] = useState("");
+    const [descricao, setDescricao] = useState('');
 
     const [resumo, setResumo] = useState('');
     const [loadingResumo, setLoadingResumo] = useState(false);
     const [tags, setTags] = useState<string[]>([]);
     const [categoria, setCategoria] = useState('');
     const [loadingTags, setLoadingTags] = useState(false);
+
+    useEffect(() => {
+        api.get('/v1/ts/folders', { params: { limit: 100 } })
+            .then(res => setFolders(res.data?._embedded?.folderDTOList ?? []))
+            .catch(() => setFolders([]));
+    }, []);
+
+    const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setThumbnailPreview(URL.createObjectURL(file));
+        setUploadingThumb(true);
+        try {
+            const formData = new FormData();
+            formData.append('arquivo', file);
+            const res = await api.post('/v1/ts/imagens', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            setThumbnailUrl(`http://localhost:8080/v1/ts/imagens/${res.data.id}`);
+        } finally {
+            setUploadingThumb(false);
+        }
+    };
 
     const gerarResumo = async () => {
         if (!inputNome && !inputDescricao) return;
@@ -60,29 +84,29 @@ const HomeBody: React.FC = () => {
     const removerTag = (tag: string) => setTags(tags.filter(t => t !== tag));
 
     const postMsg = async () => {
-        if (folderId == null) {
-            setDescricao("Não existe Branch com esse ID");
-            setPost(!post);
-        } else {
-            let flag2 = false;
-            await api.post('/v1/ts/cards/', {
-                "nome_card": inputNome,
-                "descricao_card": inputDescricao,
-                "thumbnail_card": inputThumbnail,
-                "resumo_card": resumo || null,
-                "tags_card": tags.length > 0 ? tags.join(',') : null,
-                "categoria_card": categoria || null,
-                "folderDTO": folderId
-            }).then(response => response.data)
-                .catch(async error => {
-                    if (error.response) {
-                        await setDescricao(error.response.data.descricao);
-                        flag2 = true;
-                        setPost(!post);
-                    }
-                });
-            if (!flag2) window.location.reload();
+        if (!selectedFolder) {
+            setDescricao('Selecione um folder');
+            setPost(p => !p);
+            return;
         }
+        let flag2 = false;
+        await api.post('/v1/ts/cards/', {
+            nome_card: inputNome,
+            descricao_card: inputDescricao,
+            thumbnail_card: thumbnailUrl || null,
+            resumo_card: resumo || null,
+            tags_card: tags.length > 0 ? tags.join(',') : null,
+            categoria_card: categoria || null,
+            folderDTO: selectedFolder,
+        }).then(response => response.data)
+            .catch(async error => {
+                if (error.response) {
+                    await setDescricao(error.response.data.descricao);
+                    flag2 = true;
+                    setPost(p => !p);
+                }
+            });
+        if (!flag2) window.location.reload();
     };
 
     useEffect(() => {
@@ -93,19 +117,11 @@ const HomeBody: React.FC = () => {
 
     function onCloseAlert() {
         setAlert({ type: '', text: '', show: false });
-        setPost(!post);
+        setPost(p => !p);
     }
     function onShowAlert(type: string) {
         setAlert({ type, text: descricao, show: true });
     }
-
-    useEffect(() => {
-        const findFolderById = async () => {
-            const response = await api.get('/v1/ts/folders/' + inputFolderId);
-            setFolderId(response.data);
-        };
-        if (inputFolderId) findFolderById();
-    }, [inputFolderId]);
 
     return (
         <>
@@ -133,12 +149,33 @@ const HomeBody: React.FC = () => {
                         <div id='divH1'>
                             <h1>Nome*: </h1>
                             <h1>Thumbnail: </h1>
-                            <h1>ID do Folder*: </h1>
+                            <h1>Folder*: </h1>
                         </div>
                         <div id='divInput'>
                             <input id='input' type="text" value={inputNome} onChange={e => setInputNome(e.target.value)} required />
-                            <input id='input' type="text" value={inputThumbnail} onChange={e => setInputThumbnail(e.target.value)} />
-                            <input id='input' type="text" value={inputFolderId} onChange={e => setInputFolderId(e.target.value)} required />
+
+                            <div id='thumbnail-upload'>
+                                <input type="file" accept="image/*" onChange={handleThumbnailChange} />
+                                {uploadingThumb && <span>Enviando...</span>}
+                                {thumbnailPreview && (
+                                    <img src={thumbnailPreview} alt="preview" id='thumbnail-preview' />
+                                )}
+                            </div>
+
+                            <select
+                                id='input'
+                                value={selectedFolder?.codigo_folder ?? ''}
+                                onChange={e => {
+                                    const found = folders.find(f => f.codigo_folder === Number(e.target.value));
+                                    setSelectedFolder(found ?? null);
+                                }}
+                                required
+                            >
+                                <option value=''>Selecione um folder...</option>
+                                {folders.map(f => (
+                                    <option key={f.codigo_folder} value={f.codigo_folder}>{f.nome_folder}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 

@@ -24,17 +24,20 @@ public class CardServices {
     CardDAO cardDAO;
 
     @Autowired
-    ScoreDAO scoreDAO;
+    NotificacaoServices notificacaoServices;
 
-    @Autowired
-    UserDAO userDAO;
-
-    @Autowired
-    private ScoreServices service;
-
+    @Transactional
     public CardDTO create(CardDTO cardDTO) {
+        if (cardDTO.getNome() == null || cardDTO.getNome().isBlank()) {
+            throw new BusinessException("Os campos com * são obrigatórios!");
+        }
         var entity = DozerConverter.parseObject(cardDTO, Card.class);
-        /*
+
+        if (cardDTO.getFolderDTO() != null && cardDTO.getFolderDTO().getKey() != null) {
+            entity.setIdFolder(cardDTO.getFolderDTO().getKey());
+        }
+
+         /*
         //verifica se o user ja existe dentro da tabela score
         if(scoreDAO.findScoreByNome(cardDTO.getNome()) == null){
             UserDTO userDTO = userDAO.findById(cardDTO.getIdUser());
@@ -50,7 +53,10 @@ public class CardServices {
             service.create(scoreDTO);
         }
         */
-        return DozerConverter.parseObject(cardDAO.save(entity), CardDTO.class);
+
+        Card saved = cardDAO.save(entity);
+        notificacaoServices.notificarAssinantes(saved);
+        return DozerConverter.parseObject(saved, CardDTO.class);
     }
 
     public Page<CardDTO> findCardByName(String name, Pageable pageable) {
@@ -82,31 +88,39 @@ public class CardServices {
         return DozerConverter.parseObject(entity, CardDTO.class);
     }
 
-    public CardDTO update(CardDTO card) {
-        var entity = cardDAO.findById(card.getKey())
+
+    @Transactional
+    public CardDTO update(Long id, CardDTO card) {
+        var entity = cardDAO.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID"));
-
-        //entity.setId(card.getKey());
-        entity.setIdBranch(card.getIdBranch());
-        entity.setIdFolder(card.getIdFolder());
-        entity.setIdUser(card.getIdUser());
-        entity.setNome(card.getNome());
-        entity.setDescricao(card.getDescricao());
-        entity.setThumbnail(card.getThumbnail());
-        //entity.setImageLink(card.getImageLink());
-        entity.setDataHora(card.getDataHora());
-
+        if (card.getNome() != null) entity.setNome(card.getNome());
+        if (card.getDescricao() != null) entity.setDescricao(card.getDescricao());
+        if (card.getThumbnail() != null) entity.setThumbnail(card.getThumbnail());
+        if (card.getResumo() != null) entity.setResumo(card.getResumo());
+        if (card.getTags() != null) entity.setTags(card.getTags());
+        if (card.getCategoria() != null) entity.setCategoria(card.getCategoria());
+        if (card.getFolderDTO() != null && card.getFolderDTO().getKey() != null) {
+            entity.setIdFolder(card.getFolderDTO().getKey());
+        }
         return DozerConverter.parseObject(cardDAO.save(entity), CardDTO.class);
     }
 
-  /*  @Transactional
-    public AddressVO disableUser(Long id) {
-        //cardDAO.disableCard(id);
-        var entity = cardDAO.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("No records found for this ID!"));
-        cardDAO.disablePerson(id);
-        return DozerConverter.parseObject(entity, AddressVO.class);
-    }*/
+    @Transactional(readOnly = true)
+    public Page<CardDTO> pesquisar(String nome, String categoria, Pageable pageable) {
+        boolean temNome = nome != null && !nome.isBlank();
+        boolean temCategoria = categoria != null && !categoria.isBlank();
+        Page<Card> result;
+        if (temNome && temCategoria) {
+            result = cardDAO.findByNomeContainsIgnoreCaseAndCategoriaIgnoreCase(nome, categoria, pageable);
+        } else if (temNome) {
+            result = cardDAO.findByNomeContainsIgnoreCase(nome, pageable);
+        } else if (temCategoria) {
+            result = cardDAO.findByCategoriaIgnoreCase(categoria, pageable);
+        } else {
+            result = cardDAO.findAll(pageable);
+        }
+        return result.map(CardDTO::new);
+    }
 
     public void delete(Long id) {
         Card entity = cardDAO.findById(id)
@@ -114,74 +128,7 @@ public class CardServices {
         cardDAO.delete(entity);
     }
 
-    /*
 
-     CODIGO LUCAS EXCLUIDO NA RESOLUÇÃO DE CONFLITOS DO MERGE
-
-    import java.util.Arrays;
-    import java.util.List;
-
-    @Service
-    public class CardServices {
-        private CardDAO cardDAO;
-        private BranchDAO branchDAO;
-        private FolderDAO folderDAO;
-        private UserDAO userDAO;
-        private IaService iaService;
-        private NotificacaoServices notificacaoServices;
-
-        @Transactional
-        public CardDTO save(CardDTO obj) {
-            if(obj.getNome()=="" ){
-                throw new BusinessException("Os campos com * são obrigatórios!");
-            }
-            boolean isNovo = (obj.getCodigo() == null);
-            Optional<Folder> folder = folderDAO.findById(obj.getFolderDTO().getCodigo());
-            Card entity = new Card(obj.getCodigo() ,obj.getThumbnail(), obj.getImageLink(), obj.getDescricao(), obj.getNome(),
-                    new Folder(folder.get().getCodigo(), folder.get().getDescricao(), folder.get().getNome(),
-                            new Branch(folder.get().getBranchObj().getCodigo(), folder.get().getBranchObj().getDescricao(), folder.get().getBranchObj().getNome(),
-                                    new User(folder.get().getBranchObj().getUserObj().getCodigo(), folder.get().getBranchObj().getUserObj().getAdmin(), folder.get().getBranchObj().getUserObj().getNome(), folder.get().getBranchObj().getUserObj().getDescricao(), folder.get().getBranchObj().getUserObj().getSenha()))));
-            entity.setResumo(obj.getResumo());
-            entity.setTags(obj.getTags());
-            entity.setCategoria(obj.getCategoria());
-            Card saved = cardDAO.save(entity);
-            if (isNovo) {
-                notificacaoServices.notificarAssinantes(saved);
-            }
-            return new CardDTO(saved);
-        }
-
-
-
-
-        @Transactional(readOnly = true)
-        public Page<CardDTO> pesquisar(String nome, String categoria, Pageable pageable) {
-            boolean temNome = nome != null && !nome.isBlank();
-            boolean temCategoria = categoria != null && !categoria.isBlank();
-            Page<Card> result;
-            if (temNome && temCategoria) {
-                result = cardDAO.findByNomeContainsIgnoreCaseAndCategoriaIgnoreCase(nome, categoria, pageable);
-            } else if (temNome) {
-                result = cardDAO.findByNomeContainsIgnoreCase(nome, pageable);
-            } else if (temCategoria) {
-                result = cardDAO.findByCategoriaIgnoreCase(categoria, pageable);
-            } else {
-                result = cardDAO.findAll(pageable);
-            }
-            return result.map(CardDTO::new);
-        }
-
-    /*public Page<CardDTO> findByRazaoContains(String razao, Pageable pageable) {
-        Page<Card> result = cardDAO.findByRazaoContains(razao, pageable);
-        return result.map(obj -> new CardDTO(obj));
-    }
-
-    public Page<CardDTO> findByEnderecoContains(String endereco, Pageable pageable) {
-        Page<Card> result = cardDAO.findByEnderecoContains(endereco, pageable);
-        return result.map(obj -> new CardDTO(obj));
-    }
-
-     */
        /*
         //<editor-fold defaultstate="collapsed" desc="delombok">
         @SuppressWarnings("all")

@@ -15,15 +15,21 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
     private static final long serialVersionUID = 1L;
 
     @Mapping("id")
-    @JsonProperty("id")
+    @JsonProperty("codigo_card")
     private Long key;
     private Long idFolder;
     private Long idBranch;
     private Long idUser;
+    @JsonProperty("nome_card")
     private String nome;
+    @JsonProperty("descricao_card")
     private String descricao;
+    @JsonProperty("thumbnail_card")
     private String thumbnail;
+    @JsonProperty("data_card")
     private LocalDate dataHora;
+    @JsonProperty(value = "folderDTO", access = JsonProperty.Access.WRITE_ONLY)
+    private FolderDTO folderDTO;
 
     @Size(max = 500)
     @JsonProperty("resumo_card")
@@ -85,6 +91,9 @@ public class CardDTO extends RepresentationModel<CardDTO> implements Serializabl
 
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
+
+    public FolderDTO getFolderDTO() { return folderDTO; }
+    public void setFolderDTO(FolderDTO folderDTO) { this.folderDTO = folderDTO; }
 
     @Override
     public boolean equals(Object o) {

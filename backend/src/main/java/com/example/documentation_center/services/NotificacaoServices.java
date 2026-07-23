@@ -27,8 +27,8 @@ public class NotificacaoServices {
 
     @Transactional
     public void notificarAssinantes(Card card) {
-        Integer branchId = card.getFolderObj().getBranchObj().getCodigo();
-        Integer folderId = card.getFolderObj().getCodigo();
+        Integer branchId = card.getIdBranch().intValue();
+        Integer folderId = card.getIdFolder().intValue();
         String mensagem = String.format("Nova documentação publicada: \"%s\"", card.getNome());
 
         List<User> assinantesDoTime = assinaturaDAO.findByBranch(branchId)
@@ -39,7 +39,7 @@ public class NotificacaoServices {
 
         // União sem duplicatas
         assinantesDoTime.stream()
-                .filter(u -> assinantesDaSistema.stream().noneMatch(u2 -> u2.getCodigo().equals(u.getCodigo())))
+                .filter(u -> assinantesDaSistema.stream().noneMatch(u2 -> u2.getId().equals(u.getId())))
                 .forEach(assinantesDaSistema::add);
 
         assinantesDaSistema.forEach(user ->

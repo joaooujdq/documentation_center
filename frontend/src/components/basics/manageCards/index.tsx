@@ -226,7 +226,12 @@ const CardBody: React.FC = () => {
                                     {resumo && <h1>Resumo: {resumo}</h1>}
                                     {categoriaCard && <h1>Categoria: {categoriaCard}</h1>}
                                     {tags && <h1>Tags: {tags}</h1>}
-                                    <h1>Thumbnail Link: {thumbnailLink}</h1>
+                                    <img
+                                        src={thumbnailLink || '/default-thumbnail.png'}
+                                        alt='thumbnail'
+                                        id='card-thumbnail'
+                                        onError={e => { (e.target as HTMLImageElement).src = '/default-thumbnail.png'; }}
+                                    />
                                     {descricao2 && (
                                         <div id='descricao-html' dangerouslySetInnerHTML={{ __html: descricao2 }} />
                                     )}
